@@ -1,0 +1,8 @@
+
+# local backups
+.agent/skills-backup/
+.agents/skills-backup/
+
+# secrets and builds
+.env
+node_modules/
