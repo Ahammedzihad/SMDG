@@ -30,6 +30,18 @@
       "sourceType": "github",
       "skillPath": "plugins/stitch-build/skills/react-components/SKILL.md",
       "computedHash": "cc135decbef91015d5ff43da5f8f7101f0980dc29d54767e0c1aa805e63552ed"
+    },
+    "threejs-skills": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-skills/SKILL.md",
+      "computedHash": "2ded1fc945184beb693355464db6a4f819cd2254e5f45988d67daba36baaa79f"
+    },
+    "web-realtime-socket-io": {
+      "source": "agents-inc/skills",
+      "sourceType": "github",
+      "skillPath": "src/skills/web-realtime-socket-io/SKILL.md",
+      "computedHash": "ce3861d0f427a658084fc094f14c99873eb820af7a0e45cf80295a50f66649b4"
     }
   }
 }
