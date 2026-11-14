@@ -1,0 +1,57 @@
+[
+  {
+    "id": "rideshare_dispenser",
+    "name": "SmallSat Rideshare Dispenser",
+    "cost": 0.30,
+    "capacity_by_orbit": {
+      "leo": 24.0,
+      "sso": 16.0
+    },
+    "fairing_size": "Standard 3U/6U/12U Canister Dispenser",
+    "source": "NASA CubeSat 101 p.11",
+    "sources": {
+      "cost": "NASA CubeSat 101 p.11",
+      "capacity_by_orbit.leo": "game",
+      "capacity_by_orbit.sso": "game"
+    },
+    "explanation": "Secondary payload slot on a primary commercial launch, offering an affordable ride to low orbits."
+  },
+  {
+    "id": "dedicated_light",
+    "name": "Dedicated Micro-Launcher",
+    "cost": 5.0,
+    "capacity_by_orbit": {
+      "leo": 300.0,
+      "sso": 220.0
+    },
+    "fairing_size": "1.2m Diameter Carbon Composite Fairing",
+    "source": "game",
+    "sources": {
+      "cost": "game",
+      "capacity_by_orbit.leo": "game",
+      "capacity_by_orbit.sso": "game"
+    },
+    "explanation": "Dedicated small rocket delivering tailored orbit inclination and precise deployment timing for small satellites."
+  },
+  {
+    "id": "heavy_booster",
+    "name": "Heavy Lift Multi-Stage Booster",
+    "cost": 45.0,
+    "capacity_by_orbit": {
+      "leo": 20000.0,
+      "sso": 15000.0,
+      "geo": 6000.0,
+      "high_energy": 3000.0
+    },
+    "fairing_size": "5.0m Diameter Payload Fairing",
+    "source": "game",
+    "sources": {
+      "cost": "game",
+      "capacity_by_orbit.leo": "game",
+      "capacity_by_orbit.sso": "game",
+      "capacity_by_orbit.geo": "game",
+      "capacity_by_orbit.high_energy": "game"
+    },
+    "explanation": "High-thrust orbital rocket designed to propel large scientific payloads directly to GEO or translunar injection."
+  }
+]

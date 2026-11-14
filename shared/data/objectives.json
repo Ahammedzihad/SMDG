@@ -1,0 +1,89 @@
+[
+  {
+    "id": "earth_observation",
+    "name": "Earth Surface & Weather Imaging",
+    "description": "Capture multispectral imagery of Earth's cloud formations, vegetation health, and coastal erosion patterns.",
+    "needs": [
+      "imaging",
+      "high_rate_comms",
+      "3_axis_adcs"
+    ],
+    "recommended_orbits": [
+      "sso",
+      "leo"
+    ],
+    "min_level": 1,
+    "target_data_gb_per_day": 2.5,
+    "baseline_science": "Deliver 100 high-resolution multispectral image sets per week at under 100 m ground sample distance.",
+    "threshold_science": "Deliver at least 20 cloud-free regional image sets per week at 250 m ground sample distance.",
+    "critical_checklist_items": [
+      "imager_payload_mounted",
+      "downlink_budget_closed",
+      "noaa_remote_sensing_license"
+    ],
+    "source": "NASA CubeSat 101 pp.17,47",
+    "sources": {
+      "min_level": "game",
+      "target_data_gb_per_day": "game"
+    },
+    "explanation": "High-value Earth imaging mission requiring consistent solar lighting and high-throughput data downlinks."
+  },
+  {
+    "id": "space_weather",
+    "name": "Solar Flare & Space Weather Monitor",
+    "description": "Measure solar X-ray flux, coronal mass ejection particle streams, and ionospheric ionization levels.",
+    "needs": [
+      "radiation_sensor",
+      "steady_power",
+      "coarse_pointing"
+    ],
+    "recommended_orbits": [
+      "leo",
+      "high_energy"
+    ],
+    "min_level": 1,
+    "target_data_gb_per_day": 1.0,
+    "baseline_science": "Record continuous solar X-ray irradiance across five major solar flare eruption events.",
+    "threshold_science": "Detect solar energetic particle background flux for 30 consecutive days.",
+    "critical_checklist_items": [
+      "radiation_instrument_mounted",
+      "power_balance_verified",
+      "fcc_frequency_license"
+    ],
+    "source": "NASA CubeSat 101 p.30",
+    "sources": {
+      "min_level": "game",
+      "target_data_gb_per_day": "game"
+    },
+    "explanation": "Heliophysics mission mapping radiation hazards in the space environment to protect terrestrial infrastructure."
+  },
+  {
+    "id": "deep_space_tech_demo",
+    "name": "Autonomous Deep Space Beacon & Trajectory Demo",
+    "description": "Demonstrate miniature optical navigation, micro-propulsion orbital maneuvers, and long-range communications beyond LEO.",
+    "needs": [
+      "deep_space_comms",
+      "propulsion",
+      "star_tracker"
+    ],
+    "recommended_orbits": [
+      "high_energy",
+      "geo"
+    ],
+    "min_level": 2,
+    "target_data_gb_per_day": 0.5,
+    "baseline_science": "Execute autonomous trajectory estimation and maintain bidirectional beacon telemetry for 60 days.",
+    "threshold_science": "Successfully transmit telemetry beacon packets from a high-energy transfer orbit back to ground stations.",
+    "critical_checklist_items": [
+      "trajectory_plan_approved",
+      "link_margin_closed",
+      "flight_software_margin_verified"
+    ],
+    "source": "NASA CubeSat 101 pp.3,13",
+    "sources": {
+      "min_level": "game",
+      "target_data_gb_per_day": "game"
+    },
+    "explanation": "Technology maturation mission testing deep space navigation and communications beyond the protection of Earth's magnetosphere."
+  }
+]

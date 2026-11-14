@@ -1,0 +1,72 @@
+[
+  {
+    "id": "solar_storm",
+    "name": "Coronal Mass Ejection Radiation Spike",
+    "trigger": "random_solar_flare",
+    "effect": "unshielded_computer_reboot",
+    "explanation": "High-energy solar protons breach magnetosphere; unshielded flight computers reboot while radiation-hardened processors survive.",
+    "min_level": 2,
+    "radiation_flux_multiplier": 3.5,
+    "source": "game",
+    "sources": {
+      "min_level": "game",
+      "radiation_flux_multiplier": "game"
+    }
+  },
+  {
+    "id": "ground_station_outage",
+    "name": "Ground Network Equipment Outage",
+    "trigger": "ground_antenna_maintenance",
+    "effect": "downlink_blocked_24h",
+    "explanation": "Severe storm disables the primary ground station dish; observations must be buffered in onboard storage for 24 hours.",
+    "min_level": 2,
+    "outage_duration_hours": 24.0,
+    "source": "game",
+    "sources": {
+      "min_level": "game",
+      "outage_duration_hours": "game"
+    }
+  },
+  {
+    "id": "launch_delay",
+    "name": "Primary Payload Schedule Slip",
+    "trigger": "weather_and_range_delay",
+    "effect": "launch_delayed_1_month",
+    "explanation": "The primary launch customer requests a 30-day integration delay, delaying rideshare deployment and burning operational funds.",
+    "min_level": 2,
+    "delay_months": 1.0,
+    "source": "game",
+    "sources": {
+      "min_level": "game",
+      "delay_months": "game"
+    }
+  },
+  {
+    "id": "atmospheric_drag_surge",
+    "name": "Thermospheric Solar Expansion Drag Surge",
+    "trigger": "geomagnetic_storm_heating",
+    "effect": "accelerated_orbit_decay",
+    "explanation": "Solar ultraviolet heating expands Earth's upper atmosphere, increasing aerodynamic drag and cutting LEO orbital lifetime.",
+    "min_level": 3,
+    "drag_multiplier": 1.8,
+    "source": "game",
+    "sources": {
+      "min_level": "game",
+      "drag_multiplier": "game"
+    }
+  },
+  {
+    "id": "instrument_thermal_drift",
+    "name": "Sensor Thermal Cycling Anomaly",
+    "trigger": "thermal_cycling_fatigue",
+    "effect": "sensor_calibration_drift",
+    "explanation": "Frequent eclipse thermal swings cause thermal drift in detector optics, reducing observation throughput by 20% until recalibrated.",
+    "min_level": 3,
+    "throughput_penalty_fraction": 0.20,
+    "source": "game",
+    "sources": {
+      "min_level": "game",
+      "throughput_penalty_fraction": "game"
+    }
+  }
+]

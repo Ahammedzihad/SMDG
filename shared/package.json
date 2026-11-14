@@ -1,0 +1,17 @@
+{
+  "name": "@orbitone/shared",
+  "version": "1.0.0",
+  "description": "ORBITONE space mission design game rules engine and shared data",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

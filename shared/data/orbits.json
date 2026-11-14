@@ -1,0 +1,86 @@
+[
+  {
+    "id": "leo",
+    "name": "Low Earth Orbit (LEO)",
+    "altitude_km": 400.0,
+    "sunlight_fraction": 0.62,
+    "contact_min_per_day": 45.0,
+    "launch_energy": 1.0,
+    "lifetime_penalty": 0.20,
+    "manifest_flexibility": "high",
+    "launch_period_days": 30,
+    "source": "NASA CubeSat 101 p.4",
+    "sources": {
+      "altitude_km": "NASA CubeSat 101 p.4",
+      "sunlight_fraction": "game",
+      "contact_min_per_day": "game",
+      "launch_energy": "game",
+      "lifetime_penalty": "game",
+      "launch_period_days": "game"
+    },
+    "explanation": "Low-altitude orbit with brief ground station passes, frequent eclipses requiring battery capacity, and residual atmospheric drag."
+  },
+  {
+    "id": "sso",
+    "name": "Sun-Synchronous Orbit (SSO)",
+    "altitude_km": 550.0,
+    "sunlight_fraction": 0.72,
+    "contact_min_per_day": 50.0,
+    "launch_energy": 1.2,
+    "lifetime_penalty": 0.05,
+    "manifest_flexibility": "medium",
+    "launch_period_days": 20,
+    "source": "NASA CubeSat 101 p.4",
+    "sources": {
+      "altitude_km": "NASA CubeSat 101 p.4",
+      "sunlight_fraction": "game",
+      "contact_min_per_day": "game",
+      "launch_energy": "game",
+      "lifetime_penalty": "game",
+      "launch_period_days": "game"
+    },
+    "explanation": "Polar orbit that passes over the equator at the same local solar time each day, providing constant lighting for Earth imaging."
+  },
+  {
+    "id": "geo",
+    "name": "Geostationary Orbit (GEO)",
+    "altitude_km": 35786.0,
+    "sunlight_fraction": 0.98,
+    "contact_min_per_day": 1440.0,
+    "launch_energy": 3.5,
+    "lifetime_penalty": 0.00,
+    "manifest_flexibility": "low",
+    "launch_period_days": 15,
+    "source": "game",
+    "sources": {
+      "altitude_km": "game",
+      "sunlight_fraction": "game",
+      "contact_min_per_day": "game",
+      "launch_energy": "game",
+      "lifetime_penalty": "game",
+      "launch_period_days": "game"
+    },
+    "explanation": "High equatorial orbit matching Earth rotation speed, enabling 24/7 continuous ground contact over one hemisphere."
+  },
+  {
+    "id": "high_energy",
+    "name": "Lunar Transfer / High-Energy Orbit",
+    "altitude_km": 384400.0,
+    "sunlight_fraction": 0.95,
+    "contact_min_per_day": 300.0,
+    "launch_energy": 5.0,
+    "lifetime_penalty": 0.10,
+    "manifest_flexibility": "very_low",
+    "launch_period_days": 5,
+    "source": "game",
+    "sources": {
+      "altitude_km": "game",
+      "sunlight_fraction": "game",
+      "contact_min_per_day": "game",
+      "launch_energy": "game",
+      "lifetime_penalty": "game",
+      "launch_period_days": "game"
+    },
+    "explanation": "Deep-space transfer trajectory requiring immense launch energy and high radiation tolerance to reach the Moon."
+  }
+]

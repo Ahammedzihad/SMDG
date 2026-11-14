@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1U",
+    "name": "1U CubeSat",
+    "mass_limit_kg": 1.33,
+    "height_mm": 113.5,
+    "source": "NASA CubeSat 101 pp.79-83",
+    "sources": {
+      "mass_limit_kg": "NASA CubeSat 101 pp.79-83",
+      "height_mm": "NASA CubeSat 101 pp.79-83"
+    },
+    "explanation": "Standard 1U CubeSat form factor measuring 10x10x11.35 cm with an upper mass limit under 1.33 kg."
+  },
+  {
+    "id": "1.5U",
+    "name": "1.5U CubeSat",
+    "mass_limit_kg": 2.00,
+    "height_mm": 170.2,
+    "source": "NASA CubeSat 101 pp.79-83",
+    "sources": {
+      "mass_limit_kg": "NASA CubeSat 101 pp.79-83",
+      "height_mm": "NASA CubeSat 101 pp.79-83"
+    },
+    "explanation": "1.5U elongated single-column form factor supporting small deployables with mass under 2.00 kg."
+  },
+  {
+    "id": "2U",
+    "name": "2U CubeSat",
+    "mass_limit_kg": 2.66,
+    "height_mm": 227.0,
+    "source": "NASA CubeSat 101 pp.79-83",
+    "sources": {
+      "mass_limit_kg": "NASA CubeSat 101 pp.79-83",
+      "height_mm": "NASA CubeSat 101 pp.79-83"
+    },
+    "explanation": "2U double-height chassis providing room for dedicated battery packs and payloads under 2.66 kg."
+  },
+  {
+    "id": "3U",
+    "name": "3U CubeSat",
+    "mass_limit_kg": 4.00,
+    "height_mm": 340.5,
+    "source": "NASA CubeSat 101 pp.79-83",
+    "sources": {
+      "mass_limit_kg": "NASA CubeSat 101 pp.79-83",
+      "height_mm": "NASA CubeSat 101 pp.79-83"
+    },
+    "explanation": "Popular 3U standard chassis supporting high-rate antennas and multi-sensor suites under 4.00 kg."
+  },
+  {
+    "id": "3U+",
+    "name": "3U+ CubeSat",
+    "mass_limit_kg": 4.00,
+    "height_mm": 340.5,
+    "source": "NASA CubeSat 101 pp.79-83",
+    "sources": {
+      "mass_limit_kg": "NASA CubeSat 101 pp.79-83",
+      "height_mm": "NASA CubeSat 101 pp.79-83"
+    },
+    "explanation": "3U form factor with an extended tuna can volume for deployables while retaining the 4.00 kg limit."
+  },
+  {
+    "id": "6U",
+    "name": "6U CubeSat",
+    "mass_limit_kg": 12.00,
+    "height_mm": 340.5,
+    "source": "game",
+    "sources": {
+      "mass_limit_kg": "game",
+      "height_mm": "NASA CubeSat 101 p.4"
+    },
+    "explanation": "6U twin-column chassis; size cited in CubeSat 101 p.4, but mass limit is a game-balance value."
+  }
+]
