@@ -6,3 +6,9 @@
 # secrets and builds
 .env
 node_modules/
+
+# Playwright MCP generated artifacts
+.playwright-mcp/
+
+# Vite generated cache
+.vite/
