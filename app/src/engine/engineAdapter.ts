@@ -66,6 +66,19 @@ export function computeMeters(design: MissionDesign): Meters {
   if (!USE_REAL_ENGINE) {
     return mockEngine.computeMeters(design);
   }
+  const safePartIds = design?.part_ids ?? [];
+  const unknownParts = safePartIds.filter((id) => !allParts.some((p) => p.id === id));
+  if (unknownParts.length > 0) {
+    const baseMeters = sharedComputeMeters(design);
+    return {
+      ...baseMeters,
+      mass: {
+        ...baseMeters.mass,
+        state: 'fail',
+        why: `Unrecognized component ID(s) rejected: ${unknownParts.join(', ')}. All parts must exist in the shared catalogue.`
+      }
+    };
+  }
   return sharedComputeMeters(design);
 }
 
@@ -75,6 +88,22 @@ export function runChecks(design: MissionDesign): MissionValidationResult {
   }
 
   const safePartIds = design.part_ids ?? [];
+  const unknownParts = safePartIds.filter((id) => !allParts.some((p) => p.id === id));
+  if (unknownParts.length > 0) {
+    return {
+      passed: false,
+      checks: [
+        {
+          id: 'valid_components',
+          passed: false,
+          reason: `Unknown component ID(s) rejected: ${unknownParts.join(', ')}. All components must exist in the shared catalogue.`,
+          suggestedFix: 'Remove or replace unrecognized components with valid catalogue parts.'
+        }
+      ],
+      warnings: []
+    };
+  }
+
   const resolvedParts = safePartIds
     .map((id) => allParts.find((p) => p.id === id))
     .filter((p): p is Part => p !== undefined);
@@ -140,6 +169,25 @@ export function runChecks(design: MissionDesign): MissionValidationResult {
 export function runSimulation(design: MissionDesign, seed: number = 42, level: number = 1): SimResult {
   if (!USE_REAL_ENGINE) {
     return mockEngine.runSimulation(design, seed);
+  }
+  const safePartIds = design.part_ids ?? [];
+  const unknownParts = safePartIds.filter((id) => !allParts.some((p) => p.id === id));
+  if (unknownParts.length > 0) {
+    return {
+      outcome: 'failure',
+      timeline: [],
+      series: { months: [], power_w: [], data_stored_gb: [], budget_remaining_m: [], health: [] },
+      events_applied: [],
+      cause_tags: ['INVALID_DESIGN', 'UNKNOWN_COMPONENT_ID'],
+      science_collected: 0,
+      data_generated_total_gb: 0,
+      data_transmitted_total_gb: 0,
+      data_lost_total_gb: 0,
+      final_health: 0,
+      lifetime_months: design.lifetime_months ?? 12,
+      design,
+      error: `Unknown component ID(s) rejected: ${unknownParts.join(', ')}.`
+    };
   }
   return sharedRunSimulation(design, seed, level);
 }

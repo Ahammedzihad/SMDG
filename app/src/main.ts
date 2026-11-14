@@ -13,6 +13,7 @@ import { MissionWizard } from './ui/wizard';
 import { LobbyView } from './ui/lobby/lobbyView';
 import { primaryButton, secondaryButton } from './ui/components';
 import { renderIcon } from './ui/icons';
+import { renderHowToPlayModal } from './ui/howToPlay';
 
 type MissionConfig = typeof INITIAL_CONFIG;
 type Player = { id: string; name: string; role: string; connected: boolean; suit: string };
@@ -82,6 +83,7 @@ let notice = '';
 let customName = name;
 let menuPage: 'main' | 'play' | 'customize' | 'settings' = 'main';
 let showProvenanceModal = false;
+let isHowToPlayOpen = false;
 
 // Simulation State
 let simStageIndex = 0;
@@ -374,14 +376,21 @@ function shell(content: string) {
   const userInitial = html((name || 'F').slice(0, 1).toUpperCase());
   return `<div class="app-shell">
     <header class="topbar">
-      <a class="brand-mark" href="#/home" data-action="home">${renderIcon('planet', 20, '', 'var(--brand-cyan)')} ORBITONE<span class="brand-dot">/</span>MISSION</a>
+      <a class="brand-mark" href="#/home" data-action="home" style="display:flex; align-items:baseline; gap:6px; text-decoration:none;">
+        <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; color:#ffc174; font-size:18px;">ORBIT</span>
+        <span style="font-family:'Space Grotesk',sans-serif; font-weight:600; color:#7bd0ff; font-size:11px; letter-spacing:0.12em; text-transform:uppercase;">MISSION ACADEMY</span>
+      </a>
       <div class="topbar-middle">
         <span class="topbar-kicker">NASA SPACE MISSION DESIGN GAME</span>
         <span class="topbar-separator">/</span>
         <span class="topbar-status"><i class="status-light ${serverConnected ? 'is-online' : ''}"></i>${serverConnected ? 'SERVER READY' : 'LOCAL MODE AVAILABLE'}</span>
       </div>
-      <div class="topbar-right">
-        <button class="button button-quiet" data-action="toggle-provenance" style="padding:6px 10px;font-size:9px">NASA DATA INFO</button>
+      <div class="topbar-right" style="display:flex; align-items:center; gap:8px;">
+        <button class="button button-quiet" data-action="open-how-to-play" style="padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
+          <span class="material-symbols-outlined text-[15px] text-secondary">help</span>
+          <span>HOW TO PLAY</span>
+        </button>
+        <button class="button button-quiet" data-action="toggle-provenance" style="padding:6px 10px; font-size:9px;">NASA DATA INFO</button>
         <span class="avatar-chip" style="border-color:${suitChoices.find((s) => s.id === suit)?.color || '#77e1e6'}">${userInitial}</span>
       </div>
     </header>
@@ -392,6 +401,7 @@ function shell(content: string) {
       <span>NASA POWER AOD_55 AUTHENTIC DATASET · GAME BALANCE ASSUMPTIONS CLEARLY LABELLED</span>
     </footer>
     ${showProvenanceModal ? renderProvenanceModal() : ''}
+    ${isHowToPlayOpen ? renderHowToPlayModal() : ''}
   </div>`;
 }
 
@@ -1168,6 +1178,14 @@ app.addEventListener('click', (event) => {
 
   // Navigation & Actions
   switch (target.dataset.action) {
+    case 'open-how-to-play':
+      isHowToPlayOpen = true;
+      render();
+      break;
+    case 'close-how-to-play':
+      isHowToPlayOpen = false;
+      render();
+      break;
     case 'menu-play':
       window.location.hash = '#/lobby';
       mode = 'lobby';

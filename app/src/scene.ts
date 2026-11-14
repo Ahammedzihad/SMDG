@@ -774,6 +774,9 @@ export function createMissionScene() {
       cameraPhi = Math.PI * 0.46;
       cameraDistance = 7.5;
     },
+    rotateBy(deltaTheta: number) {
+      cameraTheta += deltaTheta;
+    },
     dispose() {
       resizeObserver?.disconnect();
       window.removeEventListener('resize', resize);
