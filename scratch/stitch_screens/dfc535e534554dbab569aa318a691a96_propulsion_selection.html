@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>Orbit Mission Academy</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-fixed-dim": "#ffb95f", "inverse-on-surface": "#283141", "primary-container": "#f59e0b", "inverse-primary": "#855300", "background": "#0a1322", "secondary-fixed-dim": "#7bd0ff", "error-container": "#93000a", "primary-fixed": "#ffddb8", "on-primary": "#472a00", "surface-container-lowest": "#060e1d", "on-primary-fixed-variant": "#653e00", "tertiary": "#51e77b", "surface-tint": "#ffb95f", "secondary": "#7bd0ff", "on-primary-container": "#613b00", "tertiary-fixed-dim": "#4ae176", "error": "#ffb4ab", "surface-container-high": "#222a3a", "surface-variant": "#2c3545", "surface-container-low": "#131c2b", "on-error": "#690005", "on-secondary": "#00354a", "on-tertiary": "#003915", "surface-bright": "#31394a", "on-background": "#dae2f8", "on-error-container": "#ffdad6", "on-surface-variant": "#d8c3ad", "outline": "#a08e7a", "surface-container-highest": "#2c3545", "surface-container": "#17202f", "inverse-surface": "#dae2f8", "on-primary-fixed": "#2a1700", "surface": "#0a1322", "on-tertiary-fixed-variant": "#005321", "on-secondary-container": "#00374d", "surface-dim": "#0a1322", "primary": "#ffc174", "secondary-fixed": "#c4e7ff", "tertiary-container": "#2bca62", "on-secondary-fixed-variant": "#004c69", "on-surface": "#dae2f8", "tertiary-fixed": "#6bff8f", "on-tertiary-container": "#004f20", "secondary-container": "#00a6e0", "on-tertiary-fixed": "#002109", "outline-variant": "#534434", "on-secondary-fixed": "#001e2c" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin-mobile": "1rem", "space-md": "1rem", "space-xl": "2.5rem", "space-lg": "1.5rem", "gutter": "1.5rem", "space-xs": "0.25rem", "margin": "2.5rem", "space-sm": "0.5rem", "gutter-sm": "1rem" }, "fontFamily": { "label-sm": ["Space Grotesk"], "body-sm": ["Plus Jakarta Sans"], "label-md": ["Space Grotesk"], "headline-md": ["Space Grotesk"], "headline-lg-mobile": ["Space Grotesk"], "display-timer": ["Space Grotesk"], "headline-sm": ["Space Grotesk"], "label-lg": ["Space Grotesk"], "headline-xl-mobile": ["Space Grotesk"], "body-lg": ["Plus Jakarta Sans"], "headline-xl": ["Space Grotesk"], "headline-lg": ["Space Grotesk"], "body-md": ["Plus Jakarta Sans"] }, "fontSize": { "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.12em", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "display-timer": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "600" }], "label-lg": ["14px", { "lineHeight": "18px", "letterSpacing": "0.06em", "fontWeight": "700" }], "headline-xl-mobile": ["36px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "headline-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 left-0 right-0 z-50 h-20 bg-surface/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(2,6,18,0.5)]"><div class="h-20 w-full px-margin flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-secondary shadow-[0_0_12px_rgba(123,208,255,0.25)]"><span class="material-symbols-outlined text-[20px]">rocket_launch</span></div><div class="flex flex-col"><span class="font-label-lg text-label-lg text-on-surface uppercase tracking-wider">Orbit Mission Academy</span><span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Moon Explorer / Spacecraft Design</span></div></div><div class="h-6 w-px bg-surface-variant hidden xl:block"></div><nav class="hidden lg:flex items-center gap-space-xs p-1 bg-surface-container-lowest rounded-xl" data-active-classes="bg-secondary-container text-on-secondary-container font-bold rounded-lg shadow-[0_0_12px_rgba(0,166,224,0.35)]"><a class="px-space-md py-space-xs font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" data-path="missions" href="#">Missions</a><a aria-current="page" class="px-space-md py-space-xs uppercase tracking-wider transition-all bg-secondary-container text-on-secondary-container font-bold rounded-lg shadow-[0_0_12px_rgba(0,166,224,0.35)]" data-path="hangar" href="#">Hangar</a><a class="px-space-md py-space-xs font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" data-path="atlas" href="#">Atlas</a><a class="px-space-md py-space-xs font-label-md text-label-md uppercase tracking-wider text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface rounded-lg transition-all" data-path="cadet-log" href="#">Cadet Log</a></nav></div><div class="flex items-center gap-space-md"><button class="hidden sm:flex items-center gap-space-xs px-space-md py-2 bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface rounded-xl transition-all font-label-md text-label-md uppercase" type="button"><span class="material-symbols-outlined text-[18px] text-secondary">help</span><span>How to Play</span></button><button aria-label="Toggle Mission Audio" class="w-9 h-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-secondary flex items-center justify-center transition-all" type="button"><span class="material-symbols-outlined text-[20px]">volume_up</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Subtle ambient cosmic backdrop lighting -->
+<div class="relative w-full overflow-hidden px-margin-mobile md:px-margin py-space-lg flex flex-col gap-space-xl">
+<!-- Decorative Glowing Orb Underlay -->
+<div class="absolute -top-32 right-1/4 w-96 h-96 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -left-20 w-80 h-80 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Header & Mission Context Deck -->
+<div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg relative z-10">
+<div class="flex flex-col max-w-3xl">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-label-sm text-label-sm uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            STEP 02B: PROPULSION &amp; ENGINES // ROCKET JUICE &amp; SPEED BOOST
+          </span>
+<span class="text-outline text-label-sm font-label-sm hidden sm:inline">• FLIGHT DECK CONSOLE</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight mt-1">
+          Choose your <span class="text-primary underline decoration-primary/40 decoration-wavy decoration-2">space engines</span>.
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl leading-relaxed">
+          Once your rocket drops you off in space, your spacecraft needs its own tiny thrusters to steer, slow down, and lock into orbit around the Moon!
+        </p>
+</div>
+<!-- Critical Telemetry Gauge: Delta-V Requirement -->
+<div class="flex-shrink-0 bg-surface-container-low p-space-md rounded-2xl shadow-xl flex items-center gap-space-md max-w-md xl:max-w-none">
+<div class="w-14 h-14 rounded-xl bg-surface-container-high flex flex-col items-center justify-center text-primary shadow-inner">
+<span class="material-symbols-outlined text-[28px]">speed</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Mission Target Requirement</span>
+<span class="px-1.5 py-0.5 rounded bg-primary/20 text-primary font-label-sm text-[9px] uppercase font-bold">Crucial</span>
+</div>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-display-timer text-headline-lg text-primary tracking-tight font-bold">850</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">m/s Δv</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Minimum speed boost needed to brake into Lunar Orbit</span>
+</div>
+</div>
+</div>
+<!-- Engine Options Grid (3 Cards) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg relative z-10">
+<!-- CARD 1: Cold Gas Nitrogen -->
+<div class="engine-card group flex flex-col justify-between bg-surface-container-low hover:bg-surface-container rounded-2xl p-space-lg transition-all duration-300 shadow-md hover:shadow-xl relative overflow-hidden" data-deltav="320" data-duration="4 mins" data-engine-id="cold-gas" data-mass="20" data-valid="false">
+<div class="flex flex-col">
+<!-- Status Banner -->
+<div class="flex items-center justify-between gap-2 mb-space-md">
+<span class="px-2.5 py-1 rounded-md bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+              SIMPLE • CHEAP • LOW THRUST
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-[16px] text-primary">toll</span> 90 CR
+            </span>
+</div>
+<!-- Thruster Visual Stage -->
+<div class="relative w-full h-48 rounded-xl overflow-hidden bg-surface-container-lowest flex items-center justify-center shadow-inner">
+<img class="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500" data-alt="A kid-friendly space spacecraft cold gas thruster system with shiny silver nitrogen gas pressure tanks and miniature directional nozzles firing soft white puffs of cold nitrogen gas against deep space with distant glowing stars, 3D animated game aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADjth2grqYEikTzn5jvmMwllm35B_Bgb_bO7GBklw_74aNhjS92YE5LavpYurLeP3hbtu6LDKM4Z6BoLoVj2E6uJSLBhbMzMMjIwTYHRsfEKTP3w9q4b1DpRO6vibadQMiLuJpWp_aA5eh8RxRrB2ZyZ14NDkkon4SztttkFc2t7G6lVdEuBkyao6fFL4sOvlyrsodyTshtij0kJrSCROukncdWs_04VaZjgEUhNY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute bottom-2.5 left-3 flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-high/90 text-on-surface text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">air</span> Nitrogen Gas Canisters
+            </div>
+</div>
+<!-- Engine Title & Kid Summary -->
+<div class="mt-space-md">
+<h2 class="font-headline-md text-headline-sm text-on-surface">Cold Gas Nitrogen Puffer</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 min-h-[40px]">
+              Gentle compressed nitrogen puffs! Great for turning and aiming your camera, but lacks the muscle to brake into lunar orbit.
+            </p>
+</div>
+<!-- Cadet Stats Box -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl mt-space-md flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span> Speed Boost (Δv)
+              </span>
+<span class="font-label-md text-label-md text-on-surface font-bold">320 m/s</span>
+</div>
+<!-- Red Warning Flag: Underpowered -->
+<div class="px-2.5 py-1.5 rounded-lg bg-error-container/40 text-on-error-container font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-error flex-shrink-0">warning</span>
+<span>Not enough to enter Moon orbit alone! (-530 m/s short)</span>
+</div>
+<div class="h-px bg-surface-variant/40 my-0.5"></div>
+<div class="grid grid-cols-2 gap-2 text-label-sm font-label-sm">
+<div>
+<span class="text-on-surface-variant block">Fuel Mass</span>
+<span class="text-on-surface font-bold text-label-md">20 kg</span>
+</div>
+<div>
+<span class="text-on-surface-variant block">Complexity</span>
+<span class="text-tertiary font-bold text-label-md">Low (Pressurized)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action CTA -->
+<button class="engine-select-btn mt-space-lg w-full py-3 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 transition-all" onclick="selectEngine('cold-gas')" type="button">
+<span>Test Cold Gas</span>
+<span class="material-symbols-outlined text-[18px]">touch_app</span>
+</button>
+</div>
+<!-- CARD 2: Hydrazine Mono-Propellant (RECOMMENDED / EQUIPPED) -->
+<div class="engine-card active-card group flex flex-col justify-between bg-surface-container rounded-2xl p-space-lg transition-all duration-300 shadow-2xl relative overflow-hidden ring-2 ring-primary-container" data-deltav="1120" data-duration="14 mins" data-engine-id="hydrazine" data-mass="65" data-valid="true">
+<!-- Glow accent badge on top -->
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex flex-col">
+<!-- Status Banner -->
+<div class="flex items-center justify-between gap-2 mb-space-md">
+<span class="px-2.5 py-1 rounded-md bg-tertiary-container/30 text-tertiary-fixed font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+              OPTIMAL FIT FOR MOON EXPLORER
+            </span>
+<span class="font-label-sm text-label-sm text-primary flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-[16px]">toll</span> 210 CR
+            </span>
+</div>
+<!-- Thruster Visual Stage -->
+<div class="relative w-full h-48 rounded-xl overflow-hidden bg-surface-container-lowest flex items-center justify-center shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Twin aerospace titanium spherical propellant tanks wrapped in shiny gold thermal foil insulation connected to four quad thruster nozzles firing bright orange and amber rocket plumes, glowing warmly against dark space, 3D stylized game asset." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwmXoI_CwJtF1A3PLWuyehWWs8qFazNs8coQWAdzEbj45tagiuNSxwndF8H8UcvrClqFN9NK1X0QrwB9-KyQEwNzuIarfYXur8sbt20H9Dr71xBs5Y3J8F4QWvymMXnnCeBLgt5TvF8JdSi_hAi6j0NJudUsgYQkvFDGLbnHCZ-K5v-l0Yynsjccru3apseRoHTdw4lTR1LKcrTWEVMlKVKraMxcZgtSkvF_6nG3w"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<!-- Animated Thruster Flame Pill -->
+<div class="absolute bottom-2.5 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high/95 text-primary text-label-sm font-label-sm shadow">
+<span class="material-symbols-outlined text-[14px] text-primary animate-bounce">local_fire_department</span> Twin Hydrazine Spheres
+            </div>
+<div class="absolute top-2.5 right-3 px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold shadow-md">
+              RECOMMENDED
+            </div>
+</div>
+<!-- Engine Title & Kid Summary -->
+<div class="mt-space-md">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-md text-headline-sm text-on-surface">Hydrazine RCS Quad Thrusters</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 min-h-[40px]">
+              The gold standard of lunar missions! Delivers snappy, dependable bursts of thrust so you can brake into Moon orbit with ease.
+            </p>
+</div>
+<!-- Cadet Stats Box -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl mt-space-md flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span> Speed Boost (Δv)
+              </span>
+<span class="font-label-md text-label-md text-primary font-bold">1,120 m/s</span>
+</div>
+<!-- Green Margin Flag -->
+<div class="px-2.5 py-1.5 rounded-lg bg-tertiary-container/30 text-tertiary-fixed font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-tertiary flex-shrink-0">check_circle</span>
+<span>+270 m/s Safety Margin for Crater Maneuvers!</span>
+</div>
+<div class="h-px bg-surface-variant/40 my-0.5"></div>
+<div class="grid grid-cols-2 gap-2 text-label-sm font-label-sm">
+<div>
+<span class="text-on-surface-variant block">Fuel Mass</span>
+<span class="text-on-surface font-bold text-label-md">65 kg (Liquid)</span>
+</div>
+<div>
+<span class="text-on-surface-variant block">Reliability</span>
+<span class="text-tertiary font-bold text-label-md">99.8% Proven</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action CTA (Active state) -->
+<button class="engine-select-btn mt-space-lg w-full py-3 rounded-xl bg-gradient-to-r from-primary-container to-primary text-on-primary-container font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(245,158,11,0.4)] transition-all" onclick="selectEngine('hydrazine')" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span class="btn-text font-bold">EQUIPPED ON CRAFT</span>
+</button>
+</div>
+<!-- CARD 3: Xenon Ion Electric Engine -->
+<div class="engine-card group flex flex-col justify-between bg-surface-container-low hover:bg-surface-container rounded-2xl p-space-lg transition-all duration-300 shadow-md hover:shadow-xl relative overflow-hidden" data-deltav="2400" data-duration="48 hrs" data-engine-id="xenon-ion" data-mass="15" data-valid="warning">
+<div class="flex flex-col">
+<!-- Status Banner -->
+<div class="flex items-center justify-between gap-2 mb-space-md">
+<span class="px-2.5 py-1 rounded-md bg-secondary/15 text-secondary font-label-sm text-label-sm uppercase tracking-wider">
+              HIGH TECH • ULTRA EFFICIENT
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-[16px] text-primary">toll</span> 340 CR
+            </span>
+</div>
+<!-- Thruster Visual Stage -->
+<div class="relative w-full h-48 rounded-xl overflow-hidden bg-surface-container-lowest flex items-center justify-center shadow-inner">
+<img class="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500" data-alt="Futuristic cylindrical Xenon ion thruster ceramic engine chamber emitting an electric cyan plasma beam glowing intensely in pitch black cosmos with fine electric sparks, cinematic sci-fi render." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8KBjw5GxPHWRESvT4F1H4ZKzknFC2uYzteN4BEx1OIHGwz3VOLXx8CQ_PqPW2BHUc2NdgSOIfNbVEnn6IsWylWhh9UYCEZhGGI2ZN5iZh2IMxxRh3HXTxGhe1InORCEaH_60OzK_Y4WqqtcZpssfN26khu9cwQe4QX3EPLW1Sfbqcy2_cngOeT9lEKWTUzpgd1xHUcU5jYcW-E-9kqQJ7A6KiImQ3hYNHPw4e3Xs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-transparent to-transparent"></div>
+<div class="absolute bottom-2.5 left-3 flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-high/90 text-secondary text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary animate-pulse">electric_bolt</span> Cyan Plasma Beam
+            </div>
+</div>
+<!-- Engine Title & Kid Summary -->
+<div class="mt-space-md">
+<h2 class="font-headline-md text-headline-sm text-on-surface">NEXT-Gen Xenon Ion Drive</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 min-h-[40px]">
+              Shoots glowing electric particles at light-speed! Super fuel-efficient, but pushes very gently and drinks huge amounts of electric power.
+            </p>
+</div>
+<!-- Cadet Stats Box -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl mt-space-md flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span> Speed Boost (Δv)
+              </span>
+<span class="font-label-md text-label-md text-secondary font-bold">2,400 m/s (Huge!)</span>
+</div>
+<!-- Warning / Penalty Flag -->
+<div class="px-2.5 py-1.5 rounded-lg bg-surface-container-high text-primary-fixed-dim font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary flex-shrink-0">battery_alert</span>
+<span>Power Draw: 280 W (Requires Giant Solar Wings!)</span>
+</div>
+<div class="h-px bg-surface-variant/40 my-0.5"></div>
+<div class="grid grid-cols-2 gap-2 text-label-sm font-label-sm">
+<div>
+<span class="text-on-surface-variant block">Fuel Mass</span>
+<span class="text-on-surface font-bold text-label-md">15 kg (Ultra light)</span>
+</div>
+<div>
+<span class="text-on-surface-variant block">Thrust Force</span>
+<span class="text-on-surface-variant font-bold text-label-md">0.09 N (Whisper soft)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action CTA -->
+<button class="engine-select-btn mt-space-lg w-full py-3 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 transition-all" onclick="selectEngine('xenon-ion')" type="button">
+<span>Equip Ion Drive</span>
+<span class="material-symbols-outlined text-[18px]">power</span>
+</button>
+</div>
+</div>
+<!-- Telemetry Comparison & Simulator Dock Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mt-space-sm relative z-10">
+<!-- Left Mini Simulator: Orbit Insertion Visualizer -->
+<div class="lg:col-span-5 bg-surface-container-low rounded-2xl p-space-md flex flex-col justify-between shadow-lg">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Interactive Simulator</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">LUNAR CAPTURE VECTOR</span>
+</div>
+<!-- SVG Orbital Flight Trajectory -->
+<div class="relative w-full h-44 bg-surface-container-lowest rounded-xl overflow-hidden flex items-center justify-center p-2 shadow-inner">
+<svg class="w-full h-full" id="orbit-sim-svg" viewbox="0 0 400 180">
+<!-- Background Coordinate Grid -->
+<defs>
+<pattern height="20" id="grid-pattern" patternunits="userSpaceOnUse" width="20">
+<path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(123, 208, 255, 0.05)" stroke-width="0.5"></path>
+</pattern>
+<lineargradient id="thruster-glow" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#ffb95f" stop-opacity="0.1"></stop>
+</lineargradient>
+</defs>
+<rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
+<!-- The Moon -->
+<g transform="translate(290, 90)">
+<circle fill="#222a3a" r="42"></circle>
+<!-- Moon Surface Craters -->
+<circle cx="-12" cy="-15" fill="#17202f" opacity="0.8" r="9"></circle>
+<circle cx="16" cy="12" fill="#17202f" opacity="0.8" r="14"></circle>
+<circle cx="8" cy="-18" fill="#17202f" opacity="0.6" r="6"></circle>
+<circle cx="-18" cy="15" fill="#17202f" opacity="0.7" r="7"></circle>
+<circle fill="none" opacity="0.4" r="42" stroke="#7bd0ff" stroke-dasharray="3,3" stroke-width="1.5"></circle>
+<text fill="#dae2f8" font-family="Space Grotesk" font-size="11" font-weight="700" text-anchor="middle" x="0" y="4">THE MOON</text>
+</g>
+<!-- Trajectory Path (Dynamic based on selected engine) -->
+<!-- Hydrazine Orbit Capture Arc (Green / Captured) -->
+<path class="transition-all duration-700" d="M 30,140 Q 180,130 260,60 T 320,55 A 48 48 0 1 1 270,120" fill="none" id="trajectory-arc" stroke="#51e77b" stroke-dasharray="6,4" stroke-width="2.5"></path>
+<!-- Spacecraft Marker along Arc -->
+<g class="transition-all duration-700" id="spacecraft-marker" transform="translate(240, 75)">
+<circle fill="#f59e0b" r="6"></circle>
+<polygon fill="#ffb95f" points="-8,-4 -8,4 0,0"></polygon>
+<text fill="#dae2f8" font-family="Space Grotesk" font-size="10" font-weight="600" x="12" y="4">Probe Apex</text>
+</g>
+<!-- Status Indicator Overlay on Sim -->
+<g transform="translate(15, 25)">
+<rect fill="#060e1d" height="24" opacity="0.9" rx="6" width="130"></rect>
+<text fill="#51e77b" font-family="Space Grotesk" font-size="10" font-weight="700" id="sim-status-text" x="10" y="16">• LUNAR CAPTURE: SUCCESS</text>
+</g>
+</svg>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-label-sm font-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span> Braking burn locks craft into 100 km orbit
+          </span>
+<span class="text-secondary cursor-pointer hover:underline" onclick="reRunSimulation()">Re-run Burn</span>
+</div>
+</div>
+<!-- Center: Selected Craft Telemetry Readout -->
+<div class="lg:col-span-3 bg-surface-container-low rounded-2xl p-space-md flex flex-col justify-between shadow-lg">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest mb-space-xs">
+          Active Craft Mass &amp; Power
+        </span>
+<div class="flex flex-col gap-space-sm my-auto">
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">weight</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Thruster Mass</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold" id="stat-mass">65 kg</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">rocket</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Available Δv</span>
+</div>
+<span class="font-label-md text-label-md text-primary font-bold" id="stat-deltav">1,120 m/s</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-lowest">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">timer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Braking Burn Time</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-bold" id="stat-duration">14 mins</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden mt-space-xs">
+<div class="bg-gradient-to-r from-primary to-tertiary h-full transition-all duration-500 rounded-full" id="deltav-progress-bar" style="width: 82%;"></div>
+</div>
+</div>
+<!-- Right: Nova Co-Pilot Advice Module -->
+<div class="lg:col-span-4 bg-surface-container-low rounded-2xl p-space-md flex flex-col justify-between shadow-lg relative overflow-hidden">
+<!-- Accent top light -->
+<div class="absolute -top-10 -right-10 w-24 h-24 bg-secondary/15 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center gap-space-sm mb-2">
+<div class="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">smart_toy</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest font-bold">Nova's Co-Pilot Memo</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Academy Chief Science Specialist</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl relative my-auto">
+<span class="material-symbols-outlined text-primary/40 text-[24px] absolute top-2 right-2">format_quote</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed" id="nova-advice-quote">
+            “Cadet, Hydrazine is our clear winner here! The Xenon Ion drive is super cool, but our small solar wings can’t feed its giant hunger for electricity. Stick with Hydrazine to brake safe and sound!”
+          </p>
+</div>
+<div class="flex items-center gap-2 mt-2 pt-1">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Recommended Next Step: Assemble Solar Array in Step 02C</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive State Engine Script -->
+<script>
+    const engineData = {
+      'cold-gas': {
+        name: 'Cold Gas Nitrogen Puffer',
+        deltav: '320 m/s',
+        mass: '20 kg',
+        duration: '3 mins (Empty!)',
+        barWidth: '34%',
+        barColor: 'from-error to-error-container',
+        svgPath: 'M 30,140 Q 180,130 260,60 T 380,20',
+        simColor: '#ffb4ab',
+        simText: '&bull; MISSED ORBIT: FLYBY ONLY',
+        advice: '&ldquo;Uh-oh Cadet! Cold Gas is too weak to slow us down. We would zoom right past the Moon and get lost in deep space!&rdquo;'
+      },
+      'hydrazine': {
+        name: 'Hydrazine RCS Quad Thrusters',
+        deltav: '1,120 m/s',
+        mass: '65 kg',
+        duration: '14 mins',
+        barWidth: '82%',
+        barColor: 'from-primary to-tertiary',
+        svgPath: 'M 30,140 Q 180,130 260,60 T 320,55 A 48 48 0 1 1 270,120',
+        simColor: '#51e77b',
+        simText: '&bull; LUNAR CAPTURE: SUCCESS (100km)',
+        advice: '&ldquo;Hydrazine is our clear winner here! The Xenon Ion drive is super cool, but our small solar wings can&rsquo;t feed its giant hunger for electricity. Stick with Hydrazine to brake safe and sound!&rdquo;'
+      },
+      'xenon-ion': {
+        name: 'NEXT-Gen Xenon Ion Drive',
+        deltav: '2,400 m/s',
+        mass: '15 kg',
+        duration: '48 hrs (Slow Spiral)',
+        barWidth: '100%',
+        barColor: 'from-secondary to-primary',
+        svgPath: 'M 30,140 Q 160,110 220,90 T 260,85 A 60 60 0 1 1 250,115',
+        simColor: '#7bd0ff',
+        simText: '&bull; CAPTURE OK (WARNING: HIGH POWER)',
+        advice: '&ldquo;The Ion engine has insane speed boost, but Cadet! Our craft only generates 120 W, and this engine needs 280 W. Without huge gigawatt wings, it will shut down!&rdquo;'
+      }
+    };
+
+    function selectEngine(id) {
+      const data = engineData[id];
+      if (!data) return;
+
+      // Update Cards UI
+      document.querySelectorAll('.engine-card').forEach(card => {
+        const isCurrent = card.dataset.engineId === id;
+        const btn = card.querySelector('.engine-select-btn');
+        const btnText = btn.querySelector('.btn-text');
+
+        if (isCurrent) {
+          card.classList.add('active-card', 'ring-2', 'ring-primary-container', 'bg-surface-container');
+          card.classList.remove('bg-surface-container-low');
+          btn.className = 'engine-select-btn mt-space-lg w-full py-3 rounded-xl bg-gradient-to-r from-primary-container to-primary text-on-primary-container font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(245,158,11,0.4)] transition-all';
+          btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check</span><span class="btn-text font-bold">EQUIPPED ON CRAFT</span>`;
+        } else {
+          card.classList.remove('active-card', 'ring-2', 'ring-primary-container', 'bg-surface-container');
+          card.classList.add('bg-surface-container-low');
+          btn.className = 'engine-select-btn mt-space-lg w-full py-3 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-md text-label-md uppercase tracking-wider flex items-center justify-center gap-2 transition-all';
+          const defaultLabel = card.dataset.engineId === 'cold-gas' ? 'Select Cold Gas' : 'Equip Ion Drive';
+          btn.innerHTML = `<span>${defaultLabel}</span><span class="material-symbols-outlined text-[18px]">touch_app</span>`;
+        }
+      });
+
+      // Update Telemetry Panel
+      document.getElementById('stat-mass').textContent = data.mass;
+      document.getElementById('stat-deltav').textContent = data.deltav;
+      document.getElementById('stat-duration').textContent = data.duration;
+      
+      const bar = document.getElementById('deltav-progress-bar');
+      bar.style.width = data.barWidth;
+
+      // Update Simulator SVG
+      const arc = document.getElementById('trajectory-arc');
+      arc.setAttribute('d', data.svgPath);
+      arc.setAttribute('stroke', data.simColor);
+
+      const simStatus = document.getElementById('sim-status-text');
+      simStatus.innerHTML = data.simText;
+      simStatus.setAttribute('fill', data.simColor);
+
+      // Update Nova Advice
+      document.getElementById('nova-advice-quote').innerHTML = data.advice;
+    }
+
+    function reRunSimulation() {
+      const arc = document.getElementById('trajectory-arc');
+      arc.style.strokeDashoffset = '300';
+      arc.style.transition = 'none';
+      setTimeout(() => {
+        arc.style.transition = 'stroke-dashoffset 1.2s ease-out';
+        arc.style.strokeDashoffset = '0';
+      }, 50);
+    }
+  </script>
+</div></main><footer class="fixed bottom-0 left-0 right-0 z-50 h-24 bg-surface-container-lowest/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(2,6,18,0.7)]"><div class="h-24 w-full px-margin flex items-center justify-between gap-space-md"><div class="flex items-center"><a class="flex items-center gap-space-xs px-space-lg py-3 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-secondary hover:text-on-surface font-label-md text-label-md uppercase tracking-wider transition-all shadow-[0_0_12px_rgba(0,0,0,0.3)]" data-path="missions" href="#"><span class="material-symbols-outlined text-[18px]">arrow_back</span><span>Mission Map</span></a></div><div class="hidden md:flex items-center gap-space-md px-space-lg py-2.5 bg-surface-container-low rounded-2xl max-w-xl shadow-[0_4px_16px_rgba(0,0,0,0.4)]"><div class="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center text-secondary relative flex-shrink-0"><span class="material-symbols-outlined text-[20px]">headset_mic</span><span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-tertiary rounded-full animate-ping"></span><span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-tertiary rounded-full"></span></div><div class="flex flex-col"><span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Commander Nova • Live Telemetry</span><p class="font-body-sm text-body-sm text-on-surface line-clamp-1">“Great progress, Cadet! Check ion thruster alignment before next orbital test.”</p></div></div><div class="flex items-center"><button class="flex items-center gap-space-sm px-space-xl py-3.5 rounded-xl bg-gradient-to-r from-primary-container to-primary text-on-primary-container font-label-lg text-label-lg uppercase tracking-wider shadow-[0_0_24px_rgba(245,158,11,0.45)] hover:shadow-[0_0_32px_rgba(245,158,11,0.7)] hover:scale-[1.02] active:scale-[0.98] transition-all" type="button"><span>Continue Mission</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button></div></div></footer></body></html>
