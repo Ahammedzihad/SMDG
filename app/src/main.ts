@@ -10,6 +10,7 @@ import {
 } from './engine/engineAdapter';
 import { createMissionScene } from './scene';
 import { MissionWizard } from './ui/wizard';
+import { LobbyView } from './ui/lobby/lobbyView';
 import { primaryButton, secondaryButton } from './ui/components';
 import { renderIcon } from './ui/icons';
 
@@ -69,8 +70,9 @@ let highQualitySetting = localStorage.getItem('mission-high-quality') !== 'false
 
 // Runtime state
 let room: RoomState | null = null;
-let mode: 'menu' | 'online' | 'offline' | 'wizard' = 'menu';
+let mode: 'menu' | 'online' | 'offline' | 'wizard' | 'lobby' = 'menu';
 let wizard: MissionWizard | null = null;
+let lobbyView: LobbyView | null = null;
 let playerId = '';
 let reconnectToken = '';
 let reconnectOnNextConnect = false;
@@ -1074,6 +1076,10 @@ function mountScene() {
 
 function render() {
   if (mode === 'wizard') {
+    if (lobbyView) {
+      lobbyView.destroy();
+      lobbyView = null;
+    }
     if (!wizard) {
       wizard = new MissionWizard(app, scene);
       wizard.onExit(() => {
@@ -1092,6 +1098,28 @@ function render() {
     wizard.destroy();
     wizard = null;
   }
+  if (mode === 'lobby') {
+    if (!lobbyView) {
+      lobbyView = new LobbyView(app);
+      lobbyView.setExitHandler(() => {
+        mode = 'menu';
+        if (lobbyView) {
+          lobbyView.destroy();
+          lobbyView = null;
+        }
+        window.location.hash = '';
+        render();
+      });
+      void lobbyView.start();
+    } else {
+      lobbyView.render();
+    }
+    return;
+  }
+  if (lobbyView) {
+    lobbyView.destroy();
+    lobbyView = null;
+  }
   if (mode === 'menu' || !room) renderHome();
   else if (room.phase === 'lobby') renderLobby();
   else if (room.phase === 'design') renderDesign();
@@ -1101,7 +1129,7 @@ function render() {
 
 // Global Click Dispatcher
 app.addEventListener('click', (event) => {
-  if (mode === 'wizard') return;
+  if (mode === 'wizard' || mode === 'lobby') return;
 
   const target = (event.target as HTMLElement).closest<HTMLElement>(
     '[data-action], [data-category], [data-choice-id], [data-aod-date], [data-suit]'
@@ -1140,7 +1168,14 @@ app.addEventListener('click', (event) => {
   // Navigation & Actions
   switch (target.dataset.action) {
     case 'menu-play':
-      menuPage = 'play';
+      window.location.hash = '#lobby';
+      mode = 'lobby';
+      notice = '';
+      render();
+      break;
+    case 'start-lobby':
+      window.location.hash = '#lobby';
+      mode = 'lobby';
       notice = '';
       render();
       break;
@@ -1237,6 +1272,10 @@ app.addEventListener('click', (event) => {
         wizard.destroy();
         wizard = null;
       }
+      if (lobbyView) {
+        lobbyView.destroy();
+        lobbyView = null;
+      }
       room = null;
       playerId = '';
       reconnectToken = '';
@@ -1307,17 +1346,26 @@ window.addEventListener('beforeunload', () => scene.dispose());
 
 function handleHashChange() {
   const hash = window.location.hash.toLowerCase();
-  if (hash === '#wizard' || hash === '#game' || hash === '#solo') {
+  if (hash === '#lobby' || hash === '#team') {
+    if (mode !== 'lobby') {
+      mode = 'lobby';
+      render();
+    }
+  } else if (hash === '#wizard' || hash === '#game' || hash === '#solo') {
     if (mode !== 'wizard') {
       mode = 'wizard';
       render();
     }
   } else {
-    if (mode === 'wizard') {
+    if (mode === 'wizard' || mode === 'lobby') {
       mode = 'menu';
       if (wizard) {
         wizard.destroy();
         wizard = null;
+      }
+      if (lobbyView) {
+        lobbyView.destroy();
+        lobbyView = null;
       }
       render();
     }
@@ -1327,7 +1375,9 @@ function handleHashChange() {
 window.addEventListener('hashchange', handleHashChange);
 
 const initialHash = window.location.hash.toLowerCase();
-if (initialHash === '#wizard' || initialHash === '#game' || initialHash === '#solo') {
+if (initialHash === '#lobby' || initialHash === '#team') {
+  mode = 'lobby';
+} else if (initialHash === '#wizard' || initialHash === '#game' || initialHash === '#solo') {
   mode = 'wizard';
 }
 
