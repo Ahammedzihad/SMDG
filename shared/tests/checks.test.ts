@@ -35,7 +35,7 @@ describe('ORBITONE Hard Checks and Validation', () => {
       sso: 16.0
     },
     fairing_size: '3U/6U Canister Dispenser',
-    source: 'NASA CubeSat 101 p.11',
+    source: 'game',
     sources: {
       cost: 'NASA CubeSat 101 p.11',
       'capacity_by_orbit.leo': 'game',
@@ -280,6 +280,11 @@ describe('ORBITONE Hard Checks and Validation', () => {
       expect(u6).toBeDefined();
       expect(u6?.source).toBe('game');
       expect(u6?.sources.mass_limit_kg).toBe('game');
+      expect(u6?.sources.height_mm).toBe('game');
+      expect(u6?.explanation).not.toContain('twin-column');
+      expect(u6?.explanation).toBe(
+        'A 6U size exists (CubeSat 101 p.4); its mass and dimensions here are game values.'
+      );
 
       for (const item of classes) {
         expect(item.explanation).toBeDefined();
@@ -410,6 +415,41 @@ describe('ORBITONE Hard Checks and Validation', () => {
       expect(vehicles).toEqual(getVehicles());
       expect(parts).toEqual(getParts());
       expect(events).toEqual(getEvents());
+    });
+
+    it('enforces rule: if any numeric field has source "game", top-level source must be "game"', () => {
+      const datasets = [
+        { name: 'cubesat_classes', items: getCubesatClasses() },
+        { name: 'objectives', items: getObjectives() },
+        { name: 'orbits', items: getOrbits() },
+        { name: 'vehicles', items: getVehicles() },
+        { name: 'parts', items: getParts() },
+        { name: 'events', items: getEvents() }
+      ];
+
+      for (const { name, items } of datasets) {
+        for (const item of items as any[]) {
+          if (item.sources && typeof item.sources === 'object') {
+            const sourceValues = Object.values(item.sources) as string[];
+            const hasGameNumericSource = sourceValues.some((s) => s.toLowerCase() === 'game');
+
+            if (hasGameNumericSource) {
+              expect(
+                item.source.toLowerCase().startsWith('nasa'),
+                `${name} item "${item.id}" has numeric fields with source "game", so top-level source must not be NASA (was "${item.source}")`
+              ).toBe(false);
+              expect(item.source).toBe('game');
+            } else if (item.source.toLowerCase().startsWith('nasa')) {
+              for (const [field, src] of Object.entries(item.sources)) {
+                expect(
+                  (src as string).toLowerCase().startsWith('nasa'),
+                  `${name} item "${item.id}" top-level source is NASA, but field "${field}" source is "${src}"`
+                ).toBe(true);
+              }
+            }
+          }
+        }
+      }
     });
   });
 });

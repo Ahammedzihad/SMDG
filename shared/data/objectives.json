@@ -14,6 +14,8 @@
     ],
     "min_level": 1,
     "target_data_gb_per_day": 2.5,
+    "baseline_science_target": 100.0,
+    "threshold_science_target": 20.0,
     "baseline_science": "Deliver 100 high-resolution multispectral image sets per week at under 100 m ground sample distance.",
     "threshold_science": "Deliver at least 20 cloud-free regional image sets per week at 250 m ground sample distance.",
     "critical_checklist_items": [
@@ -21,10 +23,12 @@
       "downlink_budget_closed",
       "noaa_remote_sensing_license"
     ],
-    "source": "NASA CubeSat 101 pp.17,47",
+    "source": "game",
     "sources": {
       "min_level": "game",
-      "target_data_gb_per_day": "game"
+      "target_data_gb_per_day": "game",
+      "baseline_science_target": "game",
+      "threshold_science_target": "game"
     },
     "explanation": "High-value Earth imaging mission requiring consistent solar lighting and high-throughput data downlinks."
   },
@@ -43,6 +47,8 @@
     ],
     "min_level": 1,
     "target_data_gb_per_day": 1.0,
+    "baseline_science_target": 50.0,
+    "threshold_science_target": 15.0,
     "baseline_science": "Record continuous solar X-ray irradiance across five major solar flare eruption events.",
     "threshold_science": "Detect solar energetic particle background flux for 30 consecutive days.",
     "critical_checklist_items": [
@@ -50,10 +56,12 @@
       "power_balance_verified",
       "fcc_frequency_license"
     ],
-    "source": "NASA CubeSat 101 p.30",
+    "source": "game",
     "sources": {
       "min_level": "game",
-      "target_data_gb_per_day": "game"
+      "target_data_gb_per_day": "game",
+      "baseline_science_target": "game",
+      "threshold_science_target": "game"
     },
     "explanation": "Heliophysics mission mapping radiation hazards in the space environment to protect terrestrial infrastructure."
   },
@@ -72,6 +80,8 @@
     ],
     "min_level": 2,
     "target_data_gb_per_day": 0.5,
+    "baseline_science_target": 60.0,
+    "threshold_science_target": 15.0,
     "baseline_science": "Execute autonomous trajectory estimation and maintain bidirectional beacon telemetry for 60 days.",
     "threshold_science": "Successfully transmit telemetry beacon packets from a high-energy transfer orbit back to ground stations.",
     "critical_checklist_items": [
@@ -79,10 +89,12 @@
       "link_margin_closed",
       "flight_software_margin_verified"
     ],
-    "source": "NASA CubeSat 101 pp.3,13",
+    "source": "game",
     "sources": {
       "min_level": "game",
-      "target_data_gb_per_day": "game"
+      "target_data_gb_per_day": "game",
+      "baseline_science_target": "game",
+      "threshold_science_target": "game"
     },
     "explanation": "Technology maturation mission testing deep space navigation and communications beyond the protection of Earth's magnetosphere."
   }

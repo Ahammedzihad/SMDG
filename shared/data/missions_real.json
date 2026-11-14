@@ -1,0 +1,152 @@
+[
+  {
+    "id": "lightsail",
+    "name": "LightSail",
+    "organization": "Planetary Society",
+    "objective_type": "deep_space_tech_demo",
+    "size_class": "3U",
+    "description": "3U technology demonstration of a solar sail, crowdfunded citizen space exploration.",
+    "source": "NASA CubeSat 101 p. 13",
+    "explanation": "Solar sail deployment and propulsion technology demonstration in low Earth orbit."
+  },
+  {
+    "id": "kicksat",
+    "name": "KickSat",
+    "organization": "Cornell University",
+    "objective_type": "deep_space_tech_demo",
+    "size_class": "3U",
+    "description": "3U technology demo mothership deploying 104 tiny Sprite chip satellites.",
+    "source": "NASA CubeSat 101 p. 13",
+    "explanation": "Femtosatellite deployment system validating distributed sensor swarms."
+  },
+  {
+    "id": "stmsat_1",
+    "name": "STMSat-1",
+    "organization": "St. Thomas More Cathedral School",
+    "objective_type": "earth_observation",
+    "size_class": "1U",
+    "description": "1U education mission photographing Earth; first CubeSat built by a primary school.",
+    "source": "NASA CubeSat 101 p. 17",
+    "explanation": "1U camera payload transmitting Earth imagery to ground stations."
+  },
+  {
+    "id": "tj3sat",
+    "name": "TJ3Sat",
+    "organization": "Thomas Jefferson High School",
+    "objective_type": "education",
+    "size_class": "1U",
+    "description": "Education mission with a voice synthesizer; first high-school-built CubeSat.",
+    "source": "NASA CubeSat 101 pp. 33, 63",
+    "explanation": "High school satellite testing voice synthesizers and amateur radio communications."
+  },
+  {
+    "id": "bisonsat",
+    "name": "BisonSat",
+    "organization": "Salish Kootenai College",
+    "objective_type": "earth_observation",
+    "size_class": "1U",
+    "description": "Earth science: imagery at 100 m or better using passive magnetic stabilization.",
+    "source": "NASA CubeSat 101 p. 47",
+    "explanation": "Tribal college mission validating passive stabilization for high-resolution Earth photography."
+  },
+  {
+    "id": "minxss",
+    "name": "MinXSS",
+    "organization": "University of Colorado Boulder",
+    "objective_type": "space_weather",
+    "size_class": "3U",
+    "description": "Solar flare and Sun X-ray science investigating coronal heating mechanisms.",
+    "source": "NASA CubeSat 101 p. 30",
+    "explanation": "3U solar observatory measuring soft X-ray spectrum of flares."
+  },
+  {
+    "id": "cadre",
+    "name": "CADRE",
+    "organization": "University of Michigan",
+    "objective_type": "space_weather",
+    "size_class": "3U",
+    "description": "Space weather investigation in the thermosphere and ionosphere.",
+    "source": "NASA CubeSat 101 p. 30",
+    "explanation": "Upper atmosphere ion and neutral particle density sensor array."
+  },
+  {
+    "id": "icecube",
+    "name": "IceCube",
+    "organization": "NASA Goddard Space Flight Center",
+    "objective_type": "earth_observation",
+    "size_class": "3U",
+    "description": "Test a sub-millimeter-wave radiometer to sense cloud ice at 5 to 15 km altitude.",
+    "source": "NASA CubeSat 101 p. 31",
+    "explanation": "High-frequency radiometer evaluating atmospheric cloud ice distribution."
+  },
+  {
+    "id": "halosat",
+    "name": "HaloSat",
+    "organization": "University of Iowa",
+    "objective_type": "space_weather",
+    "size_class": "6U",
+    "description": "Map hot gas in the Milky Way halo using soft X-ray spectroscopy.",
+    "source": "NASA CubeSat 101 p. 60",
+    "explanation": "Miniaturized astronomical observatory exploring missing baryonic matter."
+  },
+  {
+    "id": "sporesat",
+    "name": "SporeSat",
+    "organization": "NASA Ames Research Center",
+    "objective_type": "biology",
+    "size_class": "3U",
+    "description": "Space biology investigation determining how plant cells sense gravity.",
+    "source": "NASA CubeSat 101 p. 25",
+    "explanation": "Autonomous microfluidic bio-sensor disc tracking calcium signaling in microgravity."
+  },
+  {
+    "id": "cxbn",
+    "name": "CXBN",
+    "organization": "Morehead State University",
+    "objective_type": "space_weather",
+    "size_class": "2U",
+    "description": "Measure the cosmic X-ray background at 30 to 50 keV with high precision.",
+    "source": "NASA CubeSat 101 p. 50",
+    "explanation": "2U astrophysics instrument resolving diffuse cosmic X-ray background radiation."
+  },
+  {
+    "id": "chargersat_1",
+    "name": "ChargerSat-1",
+    "organization": "University of Alabama Huntsville",
+    "objective_type": "deep_space_tech_demo",
+    "size_class": "1U",
+    "description": "Technology demos: gravity-gradient stabilization, deployable solar panels, antenna gain.",
+    "source": "NASA CubeSat 101 p. iv",
+    "explanation": "1U multi-technology demonstration of deployables and stabilization systems."
+  },
+  {
+    "id": "armadillo",
+    "name": "ARMADILLO",
+    "organization": "University of Texas Austin",
+    "objective_type": "deep_space_tech_demo",
+    "size_class": "3U",
+    "description": "3U attitude maneuvers and space debris characterization in low orbit.",
+    "source": "NASA CubeSat 101 p. 3",
+    "explanation": "Small satellite orbital debris detector with cold-gas thruster maneuvers."
+  },
+  {
+    "id": "dellingr",
+    "name": "Dellingr",
+    "organization": "NASA Goddard Space Flight Center",
+    "objective_type": "space_weather",
+    "size_class": "6U",
+    "description": "6U CubeSat carrying heliophysics instruments to sample space weather in LEO.",
+    "source": "NASA CubeSat 101 pp. 6, 49",
+    "explanation": "Robust 6U platform proving resilient architecture for NASA scientific smallsats."
+  },
+  {
+    "id": "fox_1",
+    "name": "Fox-1",
+    "organization": "AMSAT",
+    "objective_type": "education",
+    "size_class": "1U",
+    "description": "Education and amateur radio communications FM transponder package.",
+    "source": "NASA CubeSat 101 p. 45",
+    "explanation": "High-reliability amateur transponder providing global student outreach."
+  }
+]

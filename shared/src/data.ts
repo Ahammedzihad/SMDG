@@ -11,6 +11,7 @@ import type {
   Objective,
   Orbit,
   Part,
+  RealMission,
   Vehicle
 } from './types.js';
 
@@ -48,9 +49,14 @@ export function getEvents(): MissionEvent[] {
   return readJsonFile<MissionEvent[]>('events.json');
 }
 
+export function getRealMissions(): RealMission[] {
+  return readJsonFile<RealMission[]>('missions_real.json');
+}
+
 export const cubesatClasses: CubeSatClass[] = getCubesatClasses();
 export const objectives: Objective[] = getObjectives();
 export const orbits: Orbit[] = getOrbits();
 export const vehicles: Vehicle[] = getVehicles();
 export const parts: Part[] = getParts();
 export const events: MissionEvent[] = getEvents();
+export const realMissions: RealMission[] = getRealMissions();

@@ -8,7 +8,7 @@
       "sso": 16.0
     },
     "fairing_size": "Standard 3U/6U/12U Canister Dispenser",
-    "source": "NASA CubeSat 101 p.11",
+    "source": "game",
     "sources": {
       "cost": "NASA CubeSat 101 p.11",
       "capacity_by_orbit.leo": "game",

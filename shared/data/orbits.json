@@ -9,9 +9,9 @@
     "lifetime_penalty": 0.20,
     "manifest_flexibility": "high",
     "launch_period_days": 30,
-    "source": "NASA CubeSat 101 p.4",
+    "source": "game",
     "sources": {
-      "altitude_km": "NASA CubeSat 101 p.4",
+      "altitude_km": "game",
       "sunlight_fraction": "game",
       "contact_min_per_day": "game",
       "launch_energy": "game",
@@ -30,9 +30,9 @@
     "lifetime_penalty": 0.05,
     "manifest_flexibility": "medium",
     "launch_period_days": 20,
-    "source": "NASA CubeSat 101 p.4",
+    "source": "game",
     "sources": {
-      "altitude_km": "NASA CubeSat 101 p.4",
+      "altitude_km": "game",
       "sunlight_fraction": "game",
       "contact_min_per_day": "game",
       "launch_energy": "game",

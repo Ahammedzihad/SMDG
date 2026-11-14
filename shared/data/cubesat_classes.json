@@ -67,8 +67,8 @@
     "source": "game",
     "sources": {
       "mass_limit_kg": "game",
-      "height_mm": "NASA CubeSat 101 p.4"
+      "height_mm": "game"
     },
-    "explanation": "6U twin-column chassis; size cited in CubeSat 101 p.4, but mass limit is a game-balance value."
+    "explanation": "A 6U size exists (CubeSat 101 p.4); its mass and dimensions here are game values."
   }
 ]
