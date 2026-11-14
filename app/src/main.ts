@@ -374,7 +374,7 @@ function shell(content: string) {
   const userInitial = html((name || 'F').slice(0, 1).toUpperCase());
   return `<div class="app-shell">
     <header class="topbar">
-      <a class="brand-mark" href="#" data-action="home">${renderIcon('planet', 20, '', 'var(--brand-cyan)')} ORBITONE<span class="brand-dot">/</span>MISSION</a>
+      <a class="brand-mark" href="#/home" data-action="home">${renderIcon('planet', 20, '', 'var(--brand-cyan)')} ORBITONE<span class="brand-dot">/</span>MISSION</a>
       <div class="topbar-middle">
         <span class="topbar-kicker">NASA SPACE MISSION DESIGN GAME</span>
         <span class="topbar-separator">/</span>
@@ -448,7 +448,7 @@ function renderMainMenu() {
         <span><b>03</b> SIMULATION & TELEMETRY</span>
       </div>
       <div class="main-menu-actions">
-        ${primaryButton('START MISSION WIZARD', 'start-wizard', 'rocket')}
+        ${primaryButton('Enter the Universe', 'start-wizard', 'rocket')}
         ${secondaryButton('MULTIPLAYER LOBBY', 'menu-play', 'planet')}
         <button class="button button-quiet menu-action" data-action="menu-customize">CUSTOMIZE CHARACTER</button>
         <button class="button button-quiet menu-action" data-action="menu-settings">SETTINGS</button>
@@ -506,7 +506,7 @@ function renderPlayMenu() {
           <strong>SOLO MISSION DESIGN WIZARD</strong>
           <p>Full 7-stage conceptual mission design workflow (CML 1–7) with authentic NASA constraints, live trade-offs, and mission debrief.</p>
         </div>
-        ${primaryButton('LAUNCH SOLO WIZARD', 'start-wizard', 'rocket')}
+        ${primaryButton('Enter the Universe', 'start-wizard', 'rocket')}
       </div>
     </div>
     <p class="private-room-note">
@@ -1088,6 +1088,7 @@ function render() {
           wizard.destroy();
           wizard = null;
         }
+        window.location.hash = '#/home';
         render();
       });
     }
@@ -1107,7 +1108,7 @@ function render() {
           lobbyView.destroy();
           lobbyView = null;
         }
-        window.location.hash = '';
+        window.location.hash = '#/home';
         render();
       });
       void lobbyView.start();
@@ -1168,13 +1169,13 @@ app.addEventListener('click', (event) => {
   // Navigation & Actions
   switch (target.dataset.action) {
     case 'menu-play':
-      window.location.hash = '#lobby';
+      window.location.hash = '#/lobby';
       mode = 'lobby';
       notice = '';
       render();
       break;
     case 'start-lobby':
-      window.location.hash = '#lobby';
+      window.location.hash = '#/lobby';
       mode = 'lobby';
       notice = '';
       render();
@@ -1193,6 +1194,7 @@ app.addEventListener('click', (event) => {
     case 'menu-home':
       menuPage = 'main';
       notice = '';
+      window.location.hash = '#/home';
       render();
       break;
     case 'save-customize':
@@ -1238,12 +1240,13 @@ app.addEventListener('click', (event) => {
       void joinRoom();
       break;
     case 'start-wizard':
-      window.location.hash = '#wizard';
+    case 'enter-universe':
+      window.location.hash = '#/wizard';
       mode = 'wizard';
       render();
       break;
     case 'start-offline':
-      window.location.hash = '#wizard';
+      window.location.hash = '#/wizard';
       mode = 'wizard';
       render();
       break;
@@ -1266,8 +1269,9 @@ app.addEventListener('click', (event) => {
     case 'home':
       event.preventDefault();
       if (mode === 'online') socket.disconnect();
-      window.location.hash = '';
+      window.location.hash = '#/home';
       mode = 'menu';
+      menuPage = 'main';
       if (wizard) {
         wizard.destroy();
         wizard = null;
@@ -1344,21 +1348,40 @@ app.addEventListener('keydown', (event) => {
 
 window.addEventListener('beforeunload', () => scene.dispose());
 
-function handleHashChange() {
+function getRouteFromHash(): 'wizard' | 'lobby' | 'menu' {
   const hash = window.location.hash.toLowerCase();
-  if (hash === '#lobby' || hash === '#team') {
-    if (mode !== 'lobby') {
-      mode = 'lobby';
-      render();
-    }
-  } else if (hash === '#wizard' || hash === '#game' || hash === '#solo') {
+  const clean = hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  if (clean === 'wizard' || clean === 'game' || clean === 'solo') {
+    return 'wizard';
+  }
+  if (clean === 'lobby' || clean === 'team') {
+    return 'lobby';
+  }
+  return 'menu';
+}
+
+function handleHashChange() {
+  const targetRoute = getRouteFromHash();
+  if (targetRoute === 'wizard') {
     if (mode !== 'wizard') {
+      if (lobbyView) {
+        lobbyView.destroy();
+        lobbyView = null;
+      }
       mode = 'wizard';
       render();
     }
+  } else if (targetRoute === 'lobby') {
+    if (mode !== 'lobby') {
+      if (wizard) {
+        wizard.destroy();
+        wizard = null;
+      }
+      mode = 'lobby';
+      render();
+    }
   } else {
-    if (mode === 'wizard' || mode === 'lobby') {
-      mode = 'menu';
+    if (mode !== 'menu' || menuPage !== 'main') {
       if (wizard) {
         wizard.destroy();
         wizard = null;
@@ -1367,6 +1390,8 @@ function handleHashChange() {
         lobbyView.destroy();
         lobbyView = null;
       }
+      mode = 'menu';
+      menuPage = 'main';
       render();
     }
   }
@@ -1374,11 +1399,13 @@ function handleHashChange() {
 
 window.addEventListener('hashchange', handleHashChange);
 
-const initialHash = window.location.hash.toLowerCase();
-if (initialHash === '#lobby' || initialHash === '#team') {
-  mode = 'lobby';
-} else if (initialHash === '#wizard' || initialHash === '#game' || initialHash === '#solo') {
+const initialRoute = getRouteFromHash();
+if (initialRoute === 'wizard') {
   mode = 'wizard';
+} else if (initialRoute === 'lobby') {
+  mode = 'lobby';
+} else {
+  mode = 'menu';
 }
 
 render();

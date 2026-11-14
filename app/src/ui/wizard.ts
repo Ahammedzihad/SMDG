@@ -639,7 +639,7 @@ export class MissionWizard {
             this.restart();
             break;
           case 'exit-wizard':
-            window.location.hash = '';
+            window.location.hash = '#/home';
             if (this.exitCallback) this.exitCallback();
             break;
         }
