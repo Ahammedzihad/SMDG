@@ -9,7 +9,13 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/three": "^0.187.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.4",
+    "three": "^0.187.0"
   }
 }
