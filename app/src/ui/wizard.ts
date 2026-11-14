@@ -42,7 +42,9 @@ import { renderLaunchStage, type LaunchTelemetryState } from './stages/launch';
 import { renderReportStage } from './stages/report';
 import { renderResourceBar } from './resourceBar';
 import { renderExplainPanel, type ExplainContent } from './explainPanel';
+import { getNovaContextMessage, type ActiveSelectionContext } from './mascot';
 import { missionPath, primaryButton, secondaryButton } from './components';
+import { renderHowToPlayModal } from './howToPlay';
 
 export const STAGE_NAMES = [
   'Objective (CML 1)',
@@ -54,6 +56,14 @@ export const STAGE_NAMES = [
   'Report'
 ] as const;
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export interface FlightStep {
   met: string;
   title: string;
@@ -64,71 +74,81 @@ export interface FlightStep {
   simProgress: number;
 }
 
-const FLIGHT_STEPS: FlightStep[] = [
-  {
-    met: 'T-00:10',
-    title: 'Launch Pad Countdown',
-    detail: 'Demonstration launch site (Chesapeake Bay). Systems pre-flight health checkout. Flight computer armed.',
-    alt: '0 km',
-    vel: '0.0 km/s',
-    mode: 'launch',
-    simProgress: 0.0
-  },
-  {
-    met: 'T+00:02',
-    title: 'Main Engine Ignition & Liftoff',
-    detail: 'Rocket booster ignition. Transonic atmospheric ascent through Max-Q.',
-    alt: '45 km',
-    vel: '1.4 km/s',
-    mode: 'launch',
-    simProgress: 0.35
-  },
-  {
-    met: 'T+00:45',
-    title: 'Fairing Jettison & Upper Stage Burn',
-    detail: 'Payload fairing separated. Upper stage burn active toward orbital altitude.',
-    alt: '210 km',
-    vel: '5.8 km/s',
-    mode: 'launch',
-    simProgress: 0.75
-  },
-  {
-    met: 'T+01:15',
-    title: 'Dispenser Spring Ejection',
-    detail: 'Pneumatic dispenser release confirmed into orbital trajectory.',
-    alt: '480 km',
-    vel: '7.5 km/s',
-    mode: 'launch',
-    simProgress: 1.0
-  },
-  {
-    met: 'T+02:00',
-    title: 'Orbit Insertion & Array Deployment',
-    detail: 'Target orbital altitude established. Solar panels deploy; battery charging online.',
-    alt: '550 km',
-    vel: '7.6 km/s',
-    mode: 'deploy',
-    simProgress: 0.5
-  },
-  {
-    met: 'T+03:30',
-    title: 'Payload Sensor Checkout',
-    detail: 'Scientific instrument initialized. First observation telemetry frames buffered.',
-    alt: '550 km',
-    vel: '7.6 km/s',
-    mode: 'observe',
-    simProgress: 1.0
-  },
-  {
-    met: 'T+05:00',
-    title: 'Ground Station Downlink Contact',
-    detail: 'Acquisition of signal (AOS). Radio downlink transmitting science packets.',
-    alt: '550 km',
-    vel: '7.6 km/s',
-    mode: 'downlink',
-    simProgress: 1.0
-  }
-];
+export function buildFlightSteps(orbit?: Orbit): FlightStep[] {
+  const targetAltKm = orbit?.altitude_km ?? 550;
+  const targetAltStr = `${Math.round(targetAltKm).toLocaleString()} km`;
+  const targetOrbitName = orbit?.name ?? 'Sun-Synchronous Orbit (SSO)';
+
+  // Calculate approximate orbital insertion speed using standard gravitational parameter
+  // v = sqrt(mu / r), mu = 398600.44 km^3/s^2, r = 6378.14 + altitude
+  const orbitalSpeedKms = (Math.sqrt(398600.44 / (6378.14 + Math.min(targetAltKm, 35786)))).toFixed(1);
+
+  return [
+    {
+      met: 'T-00:10',
+      title: 'Launch Pad Countdown',
+      detail: 'Demonstration launch site (Chesapeake Bay). Systems pre-flight health checkout. Flight computer armed.',
+      alt: '0 km',
+      vel: '0.0 km/s',
+      mode: 'launch',
+      simProgress: 0.0
+    },
+    {
+      met: 'T+00:02',
+      title: 'Main Engine Ignition & Liftoff',
+      detail: 'Rocket booster ignition. Transonic atmospheric ascent through Max-Q.',
+      alt: '45 km',
+      vel: '1.4 km/s',
+      mode: 'launch',
+      simProgress: 0.35
+    },
+    {
+      met: 'T+00:45',
+      title: 'Fairing Jettison & Upper Stage Burn',
+      detail: 'Payload fairing separated. Upper stage burn active toward orbital altitude.',
+      alt: `${Math.round(Math.min(210, targetAltKm * 0.4))} km`,
+      vel: '5.8 km/s',
+      mode: 'launch',
+      simProgress: 0.75
+    },
+    {
+      met: 'T+01:15',
+      title: 'Dispenser Spring Ejection',
+      detail: 'Pneumatic dispenser release confirmed into orbital trajectory.',
+      alt: `${Math.round(Math.min(480, targetAltKm * 0.88))} km`,
+      vel: `${orbitalSpeedKms} km/s`,
+      mode: 'launch',
+      simProgress: 1.0
+    },
+    {
+      met: 'T+02:00',
+      title: 'Orbit Insertion & Array Deployment',
+      detail: `Target orbital altitude established in ${targetOrbitName}. Solar panels deploy; battery charging online.`,
+      alt: targetAltStr,
+      vel: `${orbitalSpeedKms} km/s`,
+      mode: 'deploy',
+      simProgress: 0.5
+    },
+    {
+      met: 'T+03:30',
+      title: 'Payload Sensor Checkout',
+      detail: 'Scientific instrument initialized. First observation telemetry frames buffered.',
+      alt: targetAltStr,
+      vel: `${orbitalSpeedKms} km/s`,
+      mode: 'observe',
+      simProgress: 1.0
+    },
+    {
+      met: 'T+05:00',
+      title: 'Ground Station Downlink Contact',
+      detail: 'Acquisition of signal (AOS). Radio downlink transmitting science packets.',
+      alt: targetAltStr,
+      vel: `${orbitalSpeedKms} km/s`,
+      mode: 'downlink',
+      simProgress: 1.0
+    }
+  ];
+}
 
 export interface WizardState {
   currentStage: number; // 1 to 7
@@ -154,6 +174,9 @@ export class MissionWizard {
   private flightStepIndex: number = 0;
   private isSimulating: boolean = false;
   private flightLogs: Array<{ text: string; warn?: boolean }> = [];
+  private activePartCategory: string = 'all';
+  private activeSelection: ActiveSelectionContext | null = null;
+  private isHowToPlayOpen: boolean = false;
 
   constructor(container: HTMLElement, scene?: ReturnType<typeof createMissionScene>) {
     this.container = container;
@@ -166,10 +189,10 @@ export class MissionWizard {
     this.classes = getCubesatClasses();
     this.parts = getParts();
 
-    // Default Level 1 initial design
+    // Default Level 1 initial design (aligned with Person A baseline validation fixture)
     const defaultObjective = this.objectives.find((o) => o.id === 'earth_observation')?.id ?? this.objectives[0]?.id ?? 'earth_observation';
     const defaultOrbit = this.orbits.find((o) => o.id === 'sso')?.id ?? this.orbits[0]?.id ?? 'sso';
-    const defaultVehicle = this.vehicles.find((v) => v.id === 'dedicated_light')?.id ?? this.vehicles[0]?.id ?? 'dedicated_light';
+    const defaultVehicle = this.vehicles.find((v) => v.id === 'rideshare_dispenser')?.id ?? this.vehicles[0]?.id ?? 'rideshare_dispenser';
     const defaultClass = this.classes.find((c) => c.id === '3U')?.id ?? this.classes[0]?.id ?? '3U'; // 3U standard
 
     this.state = {
@@ -185,14 +208,14 @@ export class MissionWizard {
           'solar_deployable_3u',
           'batt_space_30wh',
           'comms_sband_patch',
-          'inst_multispectral_imager',
+          'obc_rad_hard',
           'adcs_3axis_wheels',
-          'obc_rad_hard'
+          'inst_multispectral_imager'
         ],
         lifetime_months: 12,
+        budget_m: 2.5,
         fuel_mass_kg: 0.1,
-        budget_m: 65.0,
-        duty_cycle: 0.8,
+        duty_cycle: 0.5,
         observe_time_fraction: 0.5,
         link_efficiency: 0.95
       },
@@ -239,6 +262,7 @@ export class MissionWizard {
       this.scene.setSimState({ mode: 'orbit', progress: 1 });
     }
 
+    this.activeSelection = null;
     this.state.currentStage = stageNumber;
     if (stageNumber > this.state.maxStageReached) {
       this.state.maxStageReached = stageNumber;
@@ -259,55 +283,88 @@ export class MissionWizard {
   }
 
   public selectObjective(objectiveId: string): void {
+    if (!this.objectives.some((o) => o.id === objectiveId)) {
+      console.warn(`[MissionWizard] Unknown objective ID rejected: "${objectiveId}"`);
+      return;
+    }
     this.state.design.objective_id = objectiveId;
+    this.activeSelection = { type: 'objective', id: objectiveId };
     this.syncSceneWithDesign();
     this.render();
   }
 
   public selectOrbit(orbitId: string): void {
+    if (!this.orbits.some((o) => o.id === orbitId)) {
+      console.warn(`[MissionWizard] Unknown orbit ID rejected: "${orbitId}"`);
+      return;
+    }
     this.state.design.orbit_id = orbitId;
+    this.activeSelection = { type: 'orbit', id: orbitId };
     this.syncSceneWithDesign();
     this.render();
   }
 
   public selectVehicle(vehicleId: string): void {
+    if (!this.vehicles.some((v) => v.id === vehicleId)) {
+      console.warn(`[MissionWizard] Unknown vehicle ID rejected: "${vehicleId}"`);
+      return;
+    }
     this.state.design.vehicle_id = vehicleId;
+    this.activeSelection = { type: 'vehicle', id: vehicleId };
     this.syncSceneWithDesign();
     this.render();
   }
 
   public selectClass(classId: string): void {
+    if (!this.classes.some((c) => c.id === classId)) {
+      console.warn(`[MissionWizard] Unknown class ID rejected: "${classId}"`);
+      return;
+    }
     this.state.design.cubesat_class_id = classId;
+    this.activeSelection = { type: 'class', id: classId };
 
-    // Re-check structural compatibility
+    // Synchronize structure part with selected class
     if (classId === '1U') {
-      // Remove parts exceeding 1U
-      this.state.design.part_ids = this.state.design.part_ids.filter((id) => id !== 'solar_deployable_3u');
-      if (!this.state.design.part_ids.includes('solar_body_1u')) {
-        this.state.design.part_ids.push('solar_body_1u');
-      }
       this.state.design.part_ids = this.state.design.part_ids.filter((id) => id !== 'struct_3u');
       if (!this.state.design.part_ids.includes('struct_1u')) {
         this.state.design.part_ids.push('struct_1u');
       }
-    } else {
+    } else if (classId === '3U') {
       this.state.design.part_ids = this.state.design.part_ids.filter((id) => id !== 'struct_1u');
       if (!this.state.design.part_ids.includes('struct_3u')) {
         this.state.design.part_ids.push('struct_3u');
       }
     }
+    this.state.design.part_ids = Array.from(new Set(this.state.design.part_ids));
 
     this.syncSceneWithDesign();
     this.render();
   }
 
   public togglePart(partId: string): void {
+    // 1. Unknown component rejection
+    const validPart = this.parts.find((p) => p.id === partId);
+    if (!validPart) {
+      console.warn(`[MissionWizard] Unknown component ID rejected: "${partId}"`);
+      return;
+    }
+
     const current = this.state.design.part_ids;
     if (current.includes(partId)) {
+      // Remove component
       this.state.design.part_ids = current.filter((id) => id !== partId);
     } else {
-      this.state.design.part_ids = [...current, partId];
+      // Add component with structural replacement
+      let nextParts = [...current];
+      if (validPart.category === 'structure') {
+        const structurePartIds = this.parts.filter((p) => p.category === 'structure').map((p) => p.id);
+        nextParts = nextParts.filter((id) => !structurePartIds.includes(id));
+      }
+      nextParts.push(partId);
+      // Duplicate selection handling
+      this.state.design.part_ids = Array.from(new Set(nextParts));
     }
+    this.activeSelection = { type: 'part', id: partId };
     this.syncSceneWithDesign();
     this.render();
   }
@@ -338,11 +395,14 @@ export class MissionWizard {
       { text: 'Countdown T-00:10. Flight computers armed and telemetry synchronized.' }
     ];
 
+    const currentOrbit = this.orbits.find((o) => o.id === this.state.design.orbit_id) ?? this.orbits[0];
+    const flightSteps = buildFlightSteps(currentOrbit);
+
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const intervalMs = prefersReducedMotion ? 600 : 1200;
 
     // Initialize 3D scene in launch ascent mode
-    const firstStep = FLIGHT_STEPS[0];
+    const firstStep = flightSteps[0];
     this.scene.setSimState({
       mode: firstStep.mode,
       progress: firstStep.simProgress,
@@ -353,8 +413,9 @@ export class MissionWizard {
 
     this.flightTimer = window.setInterval(() => {
       this.flightStepIndex++;
-      if (this.flightStepIndex < FLIGHT_STEPS.length) {
-        const step = FLIGHT_STEPS[this.flightStepIndex];
+      const currentFlightSteps = buildFlightSteps(currentOrbit);
+      if (this.flightStepIndex < currentFlightSteps.length) {
+        const step = currentFlightSteps[this.flightStepIndex];
         this.flightLogs.unshift({ text: `${step.met}: ${step.title}` });
         this.scene.setSimState({
           mode: step.mode,
@@ -390,67 +451,35 @@ export class MissionWizard {
     this.setStage(1);
   }
 
-  private getExplainContent(): ExplainContent {
-    const stage = this.state.currentStage;
-    switch (stage) {
-      case 1:
-        return {
-          title: 'Science Objective Selection',
-          category: 'CML 1 · CONCEPT MATURITY',
-          summary: 'In NASA mission design, scientific questions always come first. The objective dictates sensor wavelength, orbital geometry, and data downlink volume.',
-          tradeoff: 'High-resolution imaging returns immense scientific value, but demands heavy optical lenses, high data rates, and sunny orbits.',
-          nasaContext: 'Earth science missions like PUNCH and HARP originated from concise scientific objectives that drove all subsequent spacecraft hardware choices.'
-        };
-      case 2:
-        return {
-          title: 'Requirement Verification',
-          category: 'CML 2 · INITIAL FEASIBILITY',
-          summary: 'NASA systems engineers translate high-level science goals into Level-1 requirements with explicit, measurable verification methods.',
-          tradeoff: 'Strict requirements guarantee scientific success, but increase test complexity, hardware mass, and schedule pressure.',
-          nasaContext: 'NASA SmallSat Institute requires every requirement to identify its verification method (test, analysis, inspection, or demonstration).'
-        };
-      case 3:
-        return {
-          title: 'Orbit & Launch Trade Space',
-          category: 'CML 3 · TRADE SPACE',
-          summary: 'Exploring trade-offs between orbital lighting, altitude drag, launch cost, and manifesting flexibility.',
-          tradeoff: 'Sun-Synchronous orbits provide consistent lighting but cost more launch energy than equatorial Low Earth Orbit.',
-          nasaContext: 'CubeSat 101 notes that rideshare missions must accept the primary payload’s orbit and date, while dedicated micro-launchers offer precision insertion at higher cost.'
-        };
-      case 4:
-        return {
-          title: 'Point Design & Master Equipment List',
-          category: 'CML 4 · POINT DESIGN',
-          summary: 'Detailed subsystem assembly: Structure, Power, Batteries, Comms, Pointing, Computer, and Instruments.',
-          tradeoff: 'Every added instrument enhances science yield, but increases dry mass, electrical load, and radio transmission backlogs.',
-          nasaContext: 'NASA JPL CML 4 point design requires an assembly-level Master Equipment List (MEL) and tracking of technical mass and power margins.'
-        };
-      case 5:
-        return {
-          title: 'Flight Readiness Review Gate',
-          category: 'PRE-LAUNCH REVIEW',
-          summary: 'Verification of physical and budgetary constraints. Hard checks block launch; advisory warnings signal low margin risk.',
-          tradeoff: 'Waiving advisory margins permits launch of complex payloads, but elevates risk of orbital brownouts or unexpected financial overruns.',
-          nasaContext: 'NASA CubeSat Launch Initiative requires strict adherence to dispenser mechanical envelopes and mass limits (e.g. 4.0 kg for 3U).'
-        };
-      case 6:
-        return {
-          title: 'Flight Ignition & Orbit Insertion',
-          category: 'LAUNCH SEGMENT',
-          summary: 'Terminal countdown, rocket ascent, dispenser ejection, and automatic antenna deployment.',
-          tradeoff: 'Spring dispensers deploy secondary satellites cleanly, but require antennas to stay stowed during ascent to avoid fairing strikes.',
-          nasaContext: 'CubeSat 101 p. 70 commissioning: antennas deploy at 30 minutes, radio beacon at 45 minutes, first payload checkout at 4 days.'
-        };
-      case 7:
-      default:
-        return {
-          title: 'Post-Mission Flight Audit',
-          category: 'MISSION DEBRIEF',
-          summary: 'Scientific evaluation comparing actual telemetry against baseline and threshold goals.',
-          tradeoff: 'Balancing power and downlink ensures continuous science return without memory overflow or power depletion.',
-          nasaContext: 'Similar real missions from CubeSat 101 demonstrate how university and NASA teams achieve real science on small budgets.'
-        };
-    }
+  private getExplainContent(meters: Meters, validation: MissionValidationResult): ExplainContent {
+    const novaMsg = getNovaContextMessage(
+      this.state.currentStage,
+      this.state.design,
+      meters,
+      validation,
+      this.activeSelection,
+      {
+        objectives: this.objectives,
+        orbits: this.orbits,
+        vehicles: this.vehicles,
+        classes: this.classes,
+        parts: this.parts
+      },
+      this.state.simResult,
+      this.state.score,
+      this.state.report
+    );
+
+    return {
+      title: 'Commander Nova',
+      category: novaMsg.eyebrow,
+      summary: novaMsg.speech,
+      tradeoff: novaMsg.tradeoff || 'Every space mission choice costs something somewhere else. No design is perfect—aerospace engineering is the art of balanced trade-offs.',
+      nasaContext: novaMsg.nasaFact,
+      engineImpact: novaMsg.engineImpact,
+      highlightAction: novaMsg.highlightAction,
+      status: novaMsg.status
+    };
   }
 
   public render(): void {
@@ -486,14 +515,30 @@ export class MissionWizard {
         stageContentHtml = renderTradeSpaceStage(this.orbits, this.vehicles, design.orbit_id, design.vehicle_id);
         break;
       case 4:
-        stageContentHtml = renderPointDesignStage(this.classes, design.cubesat_class_id, this.parts, design.part_ids);
+        stageContentHtml = renderPointDesignStage(
+          this.classes,
+          design.cubesat_class_id,
+          this.parts,
+          design.part_ids,
+          this.activePartCategory,
+          meters
+        );
         break;
       case 5:
         stageContentHtml = renderReviewStage(validation, meters);
         break;
       case 6: {
-        const currentStep = FLIGHT_STEPS[Math.min(this.flightStepIndex, FLIGHT_STEPS.length - 1)];
-        const progressPercent = Math.round(((this.flightStepIndex + 1) / FLIGHT_STEPS.length) * 100);
+        const flightSteps = buildFlightSteps(currentOrbit);
+        const currentStep = flightSteps[Math.min(this.flightStepIndex, flightSteps.length - 1)];
+        const progressPercent = Math.round(((this.flightStepIndex + 1) / flightSteps.length) * 100);
+
+        // Authoritative downlink rate derived from equipped comms part in catalogue
+        const commsPart = this.parts.find((p) => p.category === 'comms' && design.part_ids.includes(p.id));
+        const rawRateGbPerMin = commsPart?.downlink_rate_gb_per_min ?? 0;
+        // Decimal Mbps = downlink_rate_gb_per_min * 8000 / 60
+        const commsThroughputMbps = Number(((rawRateGbPerMin * 8000) / 60).toFixed(1));
+        const dataRateMbps = commsThroughputMbps;
+
         const telemetryState: LaunchTelemetryState | undefined = this.isSimulating
           ? {
               isSimulating: true,
@@ -505,7 +550,7 @@ export class MissionWizard {
               progressPercent,
               powerLoadW: meters.power.value,
               solarGenW: meters.power.limit,
-              dataRateMbps: 2.0,
+              dataRateMbps,
               logs: this.flightLogs
             }
           : undefined;
@@ -515,7 +560,8 @@ export class MissionWizard {
           currentOrbit,
           currentVehicle,
           'trigger-launch',
-          telemetryState
+          telemetryState,
+          dataRateMbps
         );
         break;
       }
@@ -535,8 +581,10 @@ export class MissionWizard {
         break;
     }
 
-    // Right explain panel
-    const explainHtml = renderExplainPanel(this.getExplainContent());
+    // Right explain panel (Commander Nova Co-Pilot Module)
+    const explainContent = this.getExplainContent(meters, validation);
+    const explainHtml = renderExplainPanel(explainContent);
+    const novaShortTip = explainContent.summary.split('.')[0] + '.';
 
     // Navigation buttons
     const isFirst = this.state.currentStage === 1;
@@ -559,8 +607,67 @@ export class MissionWizard {
       </div>
     `;
 
+    // Stitch Top Flight Deck Header
+    const flightDeckHeader = `
+      <header class="flight-deck-header fixed top-0 left-0 right-0 z-40 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-white/5 shadow-md">
+        <div class="h-16 w-full max-w-7xl mx-auto px-gutter flex items-center justify-between">
+          <div class="flex items-center gap-space-md">
+            <div class="flex items-baseline gap-space-xs cursor-pointer" data-action="exit-wizard">
+              <span class="font-headline-sm text-headline-sm font-bold tracking-tight text-primary">ORBIT</span>
+              <span class="font-label-sm text-label-sm text-secondary tracking-widest uppercase">MISSION ACADEMY</span>
+            </div>
+            <div class="w-px h-5 bg-surface-variant hidden sm:block"></div>
+            <div class="hidden sm:flex items-center gap-space-xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_#51e77b]"></span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">${escapeHtml(currentObjective.name.toUpperCase())}</span>
+              <span class="text-surface-variant font-label-sm text-label-sm">/</span>
+              <span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">${STAGE_NAMES[this.state.currentStage - 1].toUpperCase()}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-space-sm">
+            <button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all cursor-pointer shadow-sm" type="button" data-action="open-how-to-play">
+              <span class="material-symbols-outlined text-[16px] text-secondary">help</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-wider">How to play</span>
+            </button>
+            <button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-all cursor-pointer shadow-sm" type="button" data-action="toggle-audio" title="Audio Sound">
+              <span class="material-symbols-outlined text-[18px]">volume_up</span>
+            </button>
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-md cursor-pointer" data-action="exit-wizard" title="Cadet Profile">
+              <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+            </div>
+          </div>
+        </div>
+      </header>
+    `;
+
+    // Stitch Persistent Bottom Command Deck Footer
+    const commandDeckFooter = `
+      <footer class="command-deck-footer fixed bottom-0 left-0 right-0 z-40 h-20 bg-surface-container-lowest/90 backdrop-blur-xl border-t border-white/5 shadow-2xl flex items-center">
+        <div class="w-full max-w-7xl mx-auto px-gutter flex items-center justify-between">
+          ${
+            !isFirst
+              ? secondaryButton(`← Back to ${STAGE_NAMES[this.state.currentStage - 2]}`, 'prev-stage', 'back')
+              : secondaryButton('← Exit to Menu', 'exit-wizard', 'home')
+          }
+          <div class="hidden md:flex items-center gap-space-sm px-space-md py-space-xs rounded-full bg-surface-container/60">
+            <span class="material-symbols-outlined text-primary text-[18px]">tips_and_updates</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Commander Nova: <span class="text-on-surface font-medium">${escapeHtml(novaShortTip)}</span></span>
+          </div>
+          ${
+            !isLast && this.state.currentStage !== 6
+              ? primaryButton(`Proceed to ${STAGE_NAMES[this.state.currentStage]}`, 'next-stage', 'rocket')
+              : this.state.currentStage === 6
+              ? ''
+              : secondaryButton('Restart Mission', 'restart-mission', 'rocket')
+          }
+        </div>
+      </footer>
+    `;
+
     this.container.innerHTML = `
-      <div class="orbitone-game-shell">
+      <div class="orbitone-game-shell pt-16 pb-24">
+        ${flightDeckHeader}
         ${resourceBarHtml}
         ${missionPathHtml}
         <div class="wizard-workspace-grid">
@@ -570,6 +677,8 @@ export class MissionWizard {
           </main>
           ${explainHtml}
         </div>
+        ${commandDeckFooter}
+        ${this.isHowToPlayOpen ? renderHowToPlayModal() : ''}
       </div>
     `;
 
@@ -628,6 +737,31 @@ export class MissionWizard {
             if (id) this.togglePart(id);
             break;
           }
+          case 'focus-part': {
+            const id = target.getAttribute('data-part-id');
+            if (id) {
+              this.activeSelection = { type: 'part', id };
+              this.render();
+            }
+            break;
+          }
+          case 'filter-category': {
+            const cat = target.getAttribute('data-category');
+            if (cat) {
+              this.activePartCategory = cat;
+              this.render();
+            }
+            break;
+          }
+          case 'scene-rotate-left':
+            this.scene.rotateBy(-0.35);
+            break;
+          case 'scene-rotate-right':
+            this.scene.rotateBy(0.35);
+            break;
+          case 'scene-reset-camera':
+            this.scene.resetCamera();
+            break;
           case 'trigger-launch':
             this.triggerLaunch();
             break;
@@ -637,6 +771,14 @@ export class MissionWizard {
             break;
           case 'restart-mission':
             this.restart();
+            break;
+          case 'open-how-to-play':
+            this.isHowToPlayOpen = true;
+            this.render();
+            break;
+          case 'close-how-to-play':
+            this.isHowToPlayOpen = false;
+            this.render();
             break;
           case 'exit-wizard':
             window.location.hash = '#/home';

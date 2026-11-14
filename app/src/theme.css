@@ -1,63 +1,91 @@
 /**
- * ORBITONE Theme System
- * Friendly, colourful "space cartoon" aesthetic.
- * Chunky rounded buttons, glass-like cards, star rank, and glowing mission path.
+ * ORBITONE Theme System — Powered by Orbit Mission Academy (Stitch Project 1937526940901217389)
+ * Friendly, high-tech aero-command deck aesthetic.
+ * Chunky rounded buttons, glass-like telemetry cards, star rank, and glowing mission path.
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
   /* ========================================================================
+     Stitch Project 1937526940901217389 Design Tokens
+     ======================================================================== */
+  --stitch-surface: #0a1322;
+  --stitch-surface-lowest: #060e1d;
+  --stitch-surface-low: #131c2b;
+  --stitch-surface-container: #17202f;
+  --stitch-surface-high: #222a3a;
+  --stitch-surface-highest: #2c3545;
+  --stitch-on-surface: #dae2f8;
+  --stitch-on-surface-variant: #d8c3ad;
+  --stitch-primary: #ffc174;
+  --stitch-primary-container: #f59e0b;
+  --stitch-on-primary: #472a00;
+  --stitch-secondary: #7bd0ff;
+  --stitch-secondary-container: #00a6e0;
+  --stitch-tertiary: #51e77b;
+  --stitch-tertiary-container: #2bca62;
+  --stitch-outline: #a08e7a;
+  --stitch-outline-variant: #534434;
+
+  /* ========================================================================
      Space Gradient & Background Tokens
      ======================================================================== */
-  --bg-space: radial-gradient(circle at 50% 15%, #132252 0%, #09102b 50%, #040716 100%);
-  --bg-deep: #050816;
-  --bg-surface: #0c1535;
-  --bg-surface-elevated: #111d47;
+  --bg-space: radial-gradient(circle at 50% 15%, #17202f 0%, #0a1322 50%, #060e1d 100%);
+  --bg-deep: #060e1d;
+  --bg-surface: #0a1322;
+  --bg-surface-elevated: #131c2b;
   
   /* Glass Card Tokens */
-  --bg-card: rgba(18, 29, 66, 0.72);
-  --bg-card-hover: rgba(28, 44, 98, 0.85);
-  --bg-card-selected: rgba(35, 58, 126, 0.95);
-  --glass-border: rgba(110, 180, 255, 0.22);
-  --glass-border-hover: rgba(120, 200, 255, 0.45);
-  --glass-border-glow: rgba(77, 226, 255, 0.6);
-  --glass-blur: blur(14px);
+  --bg-card: rgba(19, 28, 43, 0.82);
+  --bg-card-hover: rgba(34, 42, 58, 0.9);
+  --bg-card-selected: rgba(44, 53, 69, 0.98);
+  --glass-border: rgba(123, 208, 255, 0.18);
+  --glass-border-hover: rgba(123, 208, 255, 0.45);
+  --glass-border-glow: rgba(123, 208, 255, 0.6);
+  --glass-blur: blur(16px);
 
   /* ========================================================================
      5 Core Brand Colours
      ======================================================================== */
   /* 1. Solar Gold (Primary Warm Accent / Stars / Action) */
-  --brand-yellow: #ffb800;
-  --brand-yellow-hover: #ffc726;
-  --brand-yellow-active: #e59e00;
+  --brand-yellow: #ffc174;
+  --brand-yellow-hover: #ffcf8f;
+  --brand-yellow-active: #f59e0b;
   --brand-yellow-shadow: #cc8400;
-  --brand-yellow-text: #1a1000; /* WCAG AAA 11.2:1 contrast against #ffb800 */
-  --brand-yellow-glow: rgba(255, 184, 0, 0.35);
+  --brand-yellow-text: #472a00; /* WCAG AAA high contrast */
+  --brand-yellow-glow: rgba(245, 158, 11, 0.35);
 
   /* 2. Orbit Blue (Secondary Action / Navigation / Structures) */
-  --brand-blue: #2f80ed;
-  --brand-blue-hover: #4ea1ff;
-  --brand-blue-active: #206bd1;
-  --brand-blue-shadow: #1952a5;
-  --brand-blue-text: #ffffff; /* WCAG AA 4.7:1 contrast against #2f80ed */
-  --brand-blue-glow: rgba(47, 128, 237, 0.35);
+  --brand-blue: #00a6e0;
+  --brand-blue-hover: #33bbf2;
+  --brand-blue-active: #0087b7;
+  --brand-blue-shadow: #005a7a;
+  --brand-blue-text: #ffffff;
+  --brand-blue-glow: rgba(0, 166, 224, 0.35);
 
   /* 3. Plasma Cyan (Energy / Highlights / Active Nodes) */
-  --brand-cyan: #4de2ff;
+  --brand-cyan: #7bd0ff;
   --brand-cyan-dim: #1e7a96;
   --brand-cyan-shadow: #129ebf;
-  --brand-cyan-text: #042431;
-  --brand-cyan-glow: rgba(77, 226, 255, 0.4);
+  --brand-cyan-text: #001e2c;
+  --brand-cyan-glow: rgba(123, 208, 255, 0.45);
 
   /* 4. Astro Green (Success / Cleared / Verified) */
-  --brand-green: #2bd980;
-  --brand-green-hover: #43e693;
-  --brand-green-shadow: #1ea860;
-  --brand-green-bg: rgba(43, 217, 128, 0.16);
-  --brand-green-text: #052614;
-  --brand-green-glow: rgba(43, 217, 128, 0.35);
+  --brand-green: #51e77b;
+  --brand-green-hover: #6bff8f;
+  --brand-green-shadow: #2bca62;
+  --brand-green-bg: rgba(81, 231, 123, 0.16);
+  --brand-green-text: #002109;
+  --brand-green-glow: rgba(81, 231, 123, 0.35);
 
   /* 5. Nebula Coral / Red (Alert / Anomaly / Failure) */
-  --brand-coral: #ff5757;
+  --brand-coral: #ffb4ab;
+  --brand-coral-hover: #ffc8c1;
+  --brand-coral-shadow: #93000a;
+  --brand-coral-bg: rgba(255, 180, 171, 0.16);
+  --brand-coral-text: #690005;
+  --brand-coral-glow: rgba(255, 180, 171, 0.35);
   --brand-coral-hover: #ff7070;
   --brand-coral-shadow: #c73636;
   --brand-coral-bg: rgba(255, 87, 87, 0.16);
@@ -114,10 +142,11 @@
   --space-2xl: 48px;
 
   /* ========================================================================
-     Typography (System Fallback Stacks)
+     Typography (Plus Jakarta Sans + Space Grotesk with System Fallbacks)
      ======================================================================== */
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* ==========================================================================
@@ -125,6 +154,7 @@
    ========================================================================== */
 
 body,
+.orbitone-app,
 .orbitone-game-shell,
 .app-shell {
   background: var(--bg-space);
@@ -167,46 +197,59 @@ select:focus-visible,
   user-select: none;
 }
 
-/* Primary Button: Solar Gold / Chunky 3D */
+/* Primary Button: Solar Amber Gradient / Stitch Launch CTA */
 .button-primary,
 .btn-primary {
-  background: linear-gradient(180deg, #ffc726 0%, var(--brand-yellow) 100%);
-  color: var(--brand-yellow-text);
-  box-shadow: 0 4px 0 var(--brand-yellow-shadow), 0 8px 18px var(--brand-yellow-glow);
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: #040914 !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .button-primary:hover:not(:disabled),
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffd34d 0%, #ffc01a 100%);
+  filter: brightness(1.1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--brand-yellow-shadow), 0 12px 24px var(--brand-yellow-glow);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.5);
 }
 
 .button-primary:active:not(:disabled),
 .btn-primary:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--brand-yellow-shadow), 0 4px 10px var(--brand-yellow-glow);
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
 }
 
-/* Secondary Button: Cosmic Blue / Chunky 3D */
+/* Secondary Button: Cockpit Slate with Cyan Border / Stitch Return Control */
 .button-secondary,
 .btn-secondary {
-  background: linear-gradient(180deg, #4ea1ff 0%, var(--brand-blue) 100%);
-  color: var(--brand-blue-text);
-  box-shadow: 0 4px 0 var(--brand-blue-shadow), 0 8px 18px var(--brand-blue-glow);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #dae2f8;
+  font-family: var(--font-display);
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .button-secondary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #68b0ff 0%, #3a8df5 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--brand-blue-shadow), 0 12px 24px var(--brand-blue-glow);
+  background: #2c3545;
+  border-color: #7bd0ff;
+  color: #7bd0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 12px rgba(123, 208, 255, 0.25);
 }
 
 .button-secondary:active:not(:disabled),
 .btn-secondary:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--brand-blue-shadow), 0 4px 10px var(--brand-blue-glow);
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Quiet / Glass Button */
