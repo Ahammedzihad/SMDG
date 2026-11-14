@@ -154,6 +154,7 @@
    ========================================================================== */
 
 body,
+.orbitone-app,
 .orbitone-game-shell,
 .app-shell {
   background: var(--bg-space);
@@ -196,46 +197,59 @@ select:focus-visible,
   user-select: none;
 }
 
-/* Primary Button: Solar Gold / Chunky 3D */
+/* Primary Button: Solar Amber Gradient / Stitch Launch CTA */
 .button-primary,
 .btn-primary {
-  background: linear-gradient(180deg, #ffc726 0%, var(--brand-yellow) 100%);
-  color: var(--brand-yellow-text);
-  box-shadow: 0 4px 0 var(--brand-yellow-shadow), 0 8px 18px var(--brand-yellow-glow);
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: #040914 !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .button-primary:hover:not(:disabled),
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffd34d 0%, #ffc01a 100%);
+  filter: brightness(1.1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--brand-yellow-shadow), 0 12px 24px var(--brand-yellow-glow);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.5);
 }
 
 .button-primary:active:not(:disabled),
 .btn-primary:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--brand-yellow-shadow), 0 4px 10px var(--brand-yellow-glow);
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
 }
 
-/* Secondary Button: Cosmic Blue / Chunky 3D */
+/* Secondary Button: Cockpit Slate with Cyan Border / Stitch Return Control */
 .button-secondary,
 .btn-secondary {
-  background: linear-gradient(180deg, #4ea1ff 0%, var(--brand-blue) 100%);
-  color: var(--brand-blue-text);
-  box-shadow: 0 4px 0 var(--brand-blue-shadow), 0 8px 18px var(--brand-blue-glow);
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #dae2f8;
+  font-family: var(--font-display);
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .button-secondary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #68b0ff 0%, #3a8df5 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--brand-blue-shadow), 0 12px 24px var(--brand-blue-glow);
+  background: #2c3545;
+  border-color: #7bd0ff;
+  color: #7bd0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 12px rgba(123, 208, 255, 0.25);
 }
 
 .button-secondary:active:not(:disabled),
 .btn-secondary:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--brand-blue-shadow), 0 4px 10px var(--brand-blue-glow);
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Quiet / Glass Button */

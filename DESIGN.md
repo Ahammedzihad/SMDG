@@ -114,3 +114,4 @@
 * **Bottom Flight Action Bar:**
   - Fixed height: `80px` (`5rem`).
   - Backdrop: Frosted glass bar with navigation controls (`← Mission Map` on left, flight tips in center, `CONTINUE MISSION →` on right).
+
