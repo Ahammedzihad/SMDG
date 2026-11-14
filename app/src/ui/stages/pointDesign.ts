@@ -2,7 +2,7 @@
  * Stage 4: Point Design (CML 4)
  *
  * Detailed engineering subsystem specification down to the assembly level.
- * Features CubeSat class form factor selection and the Master Equipment List (MEL).
+ * Features CubeSat class form factor selection, 3D live model view, and the Master Equipment List (MEL).
  */
 
 import type { CubeSatClass, Part } from '@shared';
@@ -93,6 +93,20 @@ export function renderPointDesignStage(
         </p>
       </div>
 
+      <div class="spacecraft-preview-panel glass-card" style="margin-bottom: 24px; padding: 16px; border-radius: 12px; background: rgba(14,24,37,0.7); border: 1px solid var(--border-light)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px">
+          <div style="display:flex; align-items:center; gap:8px">
+            <span class="live-dot"></span>
+            <strong style="font-size:11px; letter-spacing:1px; color:#fff; font-family:var(--mono)">LIVE 3D SPACECRAFT MODEL ASSEMBLY</strong>
+          </div>
+          <span style="font-size:10px; color:var(--cyan); font-family:var(--mono)">UPDATES DYNAMICALLY WITH HARDWARE SELECTIONS</span>
+        </div>
+        <div class="scene-card" style="height: 280px; border-radius: 8px; position:relative; overflow:hidden">
+          <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+          <div class="scene-scale">CLICK &amp; DRAG TO ROTATE 360° · SCROLL TO ZOOM</div>
+        </div>
+      </div>
+
       <div class="point-design-section">
         <div class="sub-heading">
           <span class="step-badge">1</span>
@@ -103,7 +117,7 @@ export function renderPointDesignStage(
         </div>
       </div>
 
-      <div class="point-design-section">
+      <div class="point-design-section" style="margin-top: 24px;">
         <div class="sub-heading">
           <span class="step-badge">2</span>
           <h3>Equip Subsystem Components</h3>
@@ -113,4 +127,3 @@ export function renderPointDesignStage(
     </section>
   `;
 }
-

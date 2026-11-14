@@ -41,7 +41,7 @@ export function renderLaunchStage(
   const canLaunch = validation.passed;
   const failedChecks = validation.checks.filter((c) => !c.passed && !c.isWarning);
 
-  // If in active launch simulation sequence, render the live flight progress HUD
+  // If in active launch simulation sequence, render the live flight progress HUD with 3D scene
   if (telemetry?.isSimulating) {
     return `
       <section class="wizard-stage-view stage-launch active-simulation-view" aria-labelledby="stage-heading">
@@ -49,6 +49,12 @@ export function renderLaunchStage(
           <span class="stage-pill">STAGE 6 OF 7 // ACTIVE FLIGHT SIMULATION</span>
           <h2 id="stage-heading">${escapeHtml(telemetry.stageTitle)}</h2>
           <p>${escapeHtml(telemetry.stageDetail)}</p>
+        </div>
+
+        <div class="launch-scene-card scene-card" style="height: 320px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; position: relative;">
+          <div class="scene-caption"><span class="live-dot"></span>LIVE 3D FLIGHT TRACKER // ${escapeHtml(telemetry.stageTitle)}</div>
+          <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+          <div class="scene-scale">CHASE CAMERA TELEMETRY · MET ${escapeHtml(telemetry.met)} · ALT ${escapeHtml(telemetry.alt)}</div>
         </div>
 
         <div class="launch-progress-hud panel">
@@ -116,11 +122,17 @@ export function renderLaunchStage(
   return `
     <section class="wizard-stage-view stage-launch" aria-labelledby="stage-heading">
       <div class="stage-heading-block">
-        <span class="stage-pill">STAGE 6 OF 7 // LAUNCH & DEPLOYMENT</span>
-        <h2 id="stage-heading">Launch & Orbit Insertion</h2>
+        <span class="stage-pill">STAGE 6 OF 7 // LAUNCH &amp; DEPLOYMENT</span>
+        <h2 id="stage-heading">Launch &amp; Orbit Insertion</h2>
         <p>
           Final flight authorization. Once launch initiates, the rocket delivers the payload dispenser into the planned orbit.
         </p>
+      </div>
+
+      <div class="launch-scene-card scene-card" style="height: 280px; margin-bottom: 20px; border-radius: 12px; overflow: hidden; position: relative;">
+        <div class="scene-caption"><span class="live-dot"></span>LAUNCH VEHICLE &amp; FLIGHT TRAJECTORY · CHESAPEAKE DEMO SITE</div>
+        <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+        <div class="scene-scale">TARGET: ${escapeHtml(orbit.name).toUpperCase()} · VEHICLE: ${escapeHtml(vehicle.name).toUpperCase()}</div>
       </div>
 
       <div class="launch-dashboard-grid">
@@ -180,7 +192,7 @@ export function renderLaunchStage(
         </div>
       </div>
 
-      <div class="launch-sequence-preview glass-card">
+      <div class="launch-sequence-preview glass-card" style="margin-top: 20px;">
         <h4>Nominal Automated Ascent Profile:</h4>
         <ol class="ascent-steps">
           <li><strong>T-00:00:</strong> Rocket engine ignition and liftoff from launch complex.</li>
@@ -193,5 +205,3 @@ export function renderLaunchStage(
     </section>
   `;
 }
-
-

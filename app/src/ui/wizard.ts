@@ -1,7 +1,7 @@
 /**
  * Solo Mission Design Wizard
  * Coordinates the 7-stage CML mission workflow, stage navigation,
- * state persistence, and live engine evaluation.
+ * state persistence, live engine evaluation, and dynamic 3D Three.js integration.
  */
 
 import type {
@@ -31,6 +31,8 @@ import {
   scoreMission
 } from '../engine/engineAdapter';
 
+import { createMissionScene, mapDesignToSceneConfig, type SimVisualState } from '../scene';
+
 import { renderObjectiveStage } from './stages/objective';
 import { renderRequirementsStage } from './stages/requirements';
 import { renderTradeSpaceStage } from './stages/tradeSpace';
@@ -52,14 +54,80 @@ export const STAGE_NAMES = [
   'Report'
 ] as const;
 
-const FLIGHT_STEPS = [
-  { met: 'T-00:10', title: 'Launch Pad Countdown', detail: 'Systems pre-flight health checkout. Flight computer armed.', alt: '0 km', vel: '0.0 km/s' },
-  { met: 'T+00:02', title: 'Main Engine Ignition & Liftoff', detail: 'Transonic atmospheric ascent through Max-Q.', alt: '45 km', vel: '1.4 km/s' },
-  { met: 'T+00:45', title: 'Fairing Jettison & Upper Stage Burn', detail: 'Payload fairing separated. Upper stage burn active.', alt: '210 km', vel: '5.8 km/s' },
-  { met: 'T+01:15', title: 'Dispenser Spring Ejection', detail: 'Pneumatic dispenser release confirmed into orbital trajectory.', alt: '480 km', vel: '7.5 km/s' },
-  { met: 'T+02:00', title: 'Orbit Insertion & Array Deployment', detail: 'Target orbital altitude established. Solar panels deploy; battery charging online.', alt: '550 km', vel: '7.6 km/s' },
-  { met: 'T+03:30', title: 'Payload Sensor Checkout', detail: 'Scientific instrument initialized. First spectral telemetry frames buffered.', alt: '550 km', vel: '7.6 km/s' },
-  { met: 'T+05:00', title: 'Ground Station Downlink Contact', detail: 'Acquisition of signal (AOS). Radio downlink transmitting telemetry packets.', alt: '550 km', vel: '7.6 km/s' }
+export interface FlightStep {
+  met: string;
+  title: string;
+  detail: string;
+  alt: string;
+  vel: string;
+  mode: SimVisualState['mode'];
+  simProgress: number;
+}
+
+const FLIGHT_STEPS: FlightStep[] = [
+  {
+    met: 'T-00:10',
+    title: 'Launch Pad Countdown',
+    detail: 'Demonstration launch site (Chesapeake Bay). Systems pre-flight health checkout. Flight computer armed.',
+    alt: '0 km',
+    vel: '0.0 km/s',
+    mode: 'launch',
+    simProgress: 0.0
+  },
+  {
+    met: 'T+00:02',
+    title: 'Main Engine Ignition & Liftoff',
+    detail: 'Rocket booster ignition. Transonic atmospheric ascent through Max-Q.',
+    alt: '45 km',
+    vel: '1.4 km/s',
+    mode: 'launch',
+    simProgress: 0.35
+  },
+  {
+    met: 'T+00:45',
+    title: 'Fairing Jettison & Upper Stage Burn',
+    detail: 'Payload fairing separated. Upper stage burn active toward orbital altitude.',
+    alt: '210 km',
+    vel: '5.8 km/s',
+    mode: 'launch',
+    simProgress: 0.75
+  },
+  {
+    met: 'T+01:15',
+    title: 'Dispenser Spring Ejection',
+    detail: 'Pneumatic dispenser release confirmed into orbital trajectory.',
+    alt: '480 km',
+    vel: '7.5 km/s',
+    mode: 'launch',
+    simProgress: 1.0
+  },
+  {
+    met: 'T+02:00',
+    title: 'Orbit Insertion & Array Deployment',
+    detail: 'Target orbital altitude established. Solar panels deploy; battery charging online.',
+    alt: '550 km',
+    vel: '7.6 km/s',
+    mode: 'deploy',
+    simProgress: 0.5
+  },
+  {
+    met: 'T+03:30',
+    title: 'Payload Sensor Checkout',
+    detail: 'Scientific instrument initialized. First observation telemetry frames buffered.',
+    alt: '550 km',
+    vel: '7.6 km/s',
+    mode: 'observe',
+    simProgress: 1.0
+  },
+  {
+    met: 'T+05:00',
+    title: 'Ground Station Downlink Contact',
+    detail: 'Acquisition of signal (AOS). Radio downlink transmitting science packets.',
+    alt: '550 km',
+    vel: '7.6 km/s',
+    mode: 'downlink',
+    simProgress: 1.0
+  }
 ];
 
 export interface WizardState {
@@ -79,6 +147,7 @@ export class MissionWizard {
   private classes: CubeSatClass[];
   private parts: Part[];
   private container: HTMLElement;
+  private scene: ReturnType<typeof createMissionScene>;
   private abortController: AbortController = new AbortController();
   private exitCallback?: () => void;
   private flightTimer: number | null = null;
@@ -86,8 +155,9 @@ export class MissionWizard {
   private isSimulating: boolean = false;
   private flightLogs: Array<{ text: string; warn?: boolean }> = [];
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, scene?: ReturnType<typeof createMissionScene>) {
     this.container = container;
+    this.scene = scene || createMissionScene();
 
     // Load authentic catalogs from shared engine
     this.objectives = getObjectives();
@@ -110,7 +180,15 @@ export class MissionWizard {
         orbit_id: defaultOrbit,
         vehicle_id: defaultVehicle,
         cubesat_class_id: defaultClass,
-        part_ids: ['struct_3u', 'solar_deployable_3u', 'batt_space_30wh', 'comms_sband_patch', 'inst_multispectral_imager', 'adcs_3axis_wheels', 'obc_rad_hard'],
+        part_ids: [
+          'struct_3u',
+          'solar_deployable_3u',
+          'batt_space_30wh',
+          'comms_sband_patch',
+          'inst_multispectral_imager',
+          'adcs_3axis_wheels',
+          'obc_rad_hard'
+        ],
         lifetime_months: 12,
         fuel_mass_kg: 0.1,
         budget_m: 65.0,
@@ -124,6 +202,7 @@ export class MissionWizard {
     };
 
     this.attachEventListeners();
+    this.syncSceneWithDesign();
   }
 
   public onExit(fn: () => void): void {
@@ -142,8 +221,24 @@ export class MissionWizard {
     return this.state;
   }
 
+  public syncSceneWithDesign(): void {
+    const config = mapDesignToSceneConfig(this.state.design);
+    this.scene.update(config);
+  }
+
   public setStage(stageNumber: number): void {
     if (stageNumber < 1 || stageNumber > 7) return;
+
+    // Leaving launch stage while simulating? Reset simulation state gracefully
+    if (this.state.currentStage === 6 && stageNumber !== 6 && this.isSimulating) {
+      if (this.flightTimer) {
+        clearInterval(this.flightTimer);
+        this.flightTimer = null;
+      }
+      this.isSimulating = false;
+      this.scene.setSimState({ mode: 'orbit', progress: 1 });
+    }
+
     this.state.currentStage = stageNumber;
     if (stageNumber > this.state.maxStageReached) {
       this.state.maxStageReached = stageNumber;
@@ -165,21 +260,25 @@ export class MissionWizard {
 
   public selectObjective(objectiveId: string): void {
     this.state.design.objective_id = objectiveId;
+    this.syncSceneWithDesign();
     this.render();
   }
 
   public selectOrbit(orbitId: string): void {
     this.state.design.orbit_id = orbitId;
+    this.syncSceneWithDesign();
     this.render();
   }
 
   public selectVehicle(vehicleId: string): void {
     this.state.design.vehicle_id = vehicleId;
+    this.syncSceneWithDesign();
     this.render();
   }
 
   public selectClass(classId: string): void {
     this.state.design.cubesat_class_id = classId;
+
     // Re-check structural compatibility
     if (classId === '1U') {
       // Remove parts exceeding 1U
@@ -197,6 +296,8 @@ export class MissionWizard {
         this.state.design.part_ids.push('struct_3u');
       }
     }
+
+    this.syncSceneWithDesign();
     this.render();
   }
 
@@ -207,11 +308,23 @@ export class MissionWizard {
     } else {
       this.state.design.part_ids = [...current, partId];
     }
+    this.syncSceneWithDesign();
     this.render();
   }
 
   public triggerLaunch(): void {
-    // Run authentic simulation and scoring
+    // 1. Hard Gate: Do not launch if validation checks fail!
+    const validation = runChecks(this.state.design);
+    if (!validation.passed) {
+      return;
+    }
+
+    // 2. Prevent overlapping launch triggers
+    if (this.isSimulating) {
+      return;
+    }
+
+    // 3. Run authentic simulation and scoring
     const sim = runSimulation(this.state.design, 42, 1);
     const score = scoreMission(sim, 'solo');
     const report = buildReport(sim, score);
@@ -225,6 +338,17 @@ export class MissionWizard {
       { text: 'Countdown T-00:10. Flight computers armed and telemetry synchronized.' }
     ];
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const intervalMs = prefersReducedMotion ? 600 : 1200;
+
+    // Initialize 3D scene in launch ascent mode
+    const firstStep = FLIGHT_STEPS[0];
+    this.scene.setSimState({
+      mode: firstStep.mode,
+      progress: firstStep.simProgress,
+      stageText: firstStep.title
+    });
+
     if (this.flightTimer) clearInterval(this.flightTimer);
 
     this.flightTimer = window.setInterval(() => {
@@ -232,11 +356,16 @@ export class MissionWizard {
       if (this.flightStepIndex < FLIGHT_STEPS.length) {
         const step = FLIGHT_STEPS[this.flightStepIndex];
         this.flightLogs.unshift({ text: `${step.met}: ${step.title}` });
+        this.scene.setSimState({
+          mode: step.mode,
+          progress: step.simProgress,
+          stageText: step.title
+        });
         this.render();
       } else {
         this.finishLaunchSimulation();
       }
-    }, 1200);
+    }, intervalMs);
 
     this.render();
   }
@@ -247,6 +376,7 @@ export class MissionWizard {
       this.flightTimer = null;
     }
     this.isSimulating = false;
+    this.scene.setSimState({ mode: 'orbit', progress: 1 });
     this.setStage(7);
   }
 
@@ -254,6 +384,9 @@ export class MissionWizard {
     this.state.simResult = null;
     this.state.score = null;
     this.state.report = null;
+    this.isSimulating = false;
+    this.flightStepIndex = 0;
+    this.scene.setSimState({ mode: 'orbit', progress: 0 });
     this.setStage(1);
   }
 
@@ -439,6 +572,13 @@ export class MissionWizard {
         </div>
       </div>
     `;
+
+    // Mount 3D scene into active container host (e.g. Stage 3, Stage 4, Stage 6)
+    const sceneHost = this.container.querySelector<HTMLElement>('[data-scene]');
+    if (sceneHost) {
+      this.scene.mount(sceneHost);
+    }
+    this.syncSceneWithDesign();
   }
 
   private attachEventListeners(): void {

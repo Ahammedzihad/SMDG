@@ -98,24 +98,18 @@ export function renderTradeSpaceStage(
               <strong>$${veh.cost.toFixed(2)} $M</strong>
             </div>
             <div class="stat-box">
-              <span class="stat-label" style="display:inline-flex; align-items:center; gap:3px">${renderIcon('mass', 12)} LIFT CAPACITY</span>
-              <strong style="color: ${isCapable ? 'var(--cyan)' : 'var(--brand-coral)'}">
-                ${isCapable ? `${capacityForOrbit.toLocaleString()} kg` : '0 kg (Incompatible)'}
-              </strong>
+              <span class="stat-label">PAYLOAD CAPACITY</span>
+              <strong>${capacityForOrbit > 0 ? `${capacityForOrbit} kg` : 'INCOMPATIBLE'}</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">FAIRING ENVELOPE</span>
+              <strong>${escapeHtml(veh.fairing_size)}</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">DATA SOURCE</span>
+              <strong>${escapeHtml(veh.source)}</strong>
             </div>
           </div>
-
-          <div class="fairing-note">
-            <small>Payload Fairing: ${escapeHtml(veh.fairing_size)}</small>
-          </div>
-
-          ${
-            !isCapable
-              ? `<div class="incompatible-warning" role="alert" style="display:flex; align-items:center; gap:6px">
-                  ${renderIcon('warning', 14, '', 'var(--brand-coral)')} This launch vehicle cannot lift payloads to the currently selected orbit.
-                </div>`
-              : ''
-          }
         </article>
       `;
     })
@@ -124,17 +118,31 @@ export function renderTradeSpaceStage(
   return `
     <section class="wizard-stage-view stage-trade-space" aria-labelledby="stage-heading">
       <div class="stage-heading-block">
-        <span class="stage-pill">STAGE 3 OF 7 // TRADE SPACE EXPLORATION</span>
-        <h2 id="stage-heading">Trade Space (CML 3)</h2>
+        <span class="stage-pill">STAGE 3 OF 7 // MISSION ARCHITECTURE</span>
+        <h2 id="stage-heading">Trade Space Exploration (CML 3)</h2>
         <p>
-          Compare system options side by side. Higher orbits increase ground contact and solar lighting, but require more launch energy.
-          Dedicated rockets cost more than rideshare, but allow custom orbits and deployment timing.
+          Evaluate architecture trade-offs between orbital parameters and launch vehicles.
+          Orbits dictate eclipse cycles, solar generation, and ground station passes, while launch vehicles dictate capacity and cost.
         </p>
       </div>
 
-      <div class="trade-section-block">
+      <div class="orbit-preview-panel glass-card" style="margin-bottom: 24px; padding: 16px; border-radius: 12px; background: rgba(14,24,37,0.7); border: 1px solid var(--border-light)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px">
+          <div style="display:flex; align-items:center; gap:8px">
+            <span class="live-dot"></span>
+            <strong style="font-size:11px; letter-spacing:1px; color:#fff; font-family:var(--mono)">ORBITAL TRAJECTORY 3D SIMULATION</strong>
+          </div>
+          <span style="font-size:10px; color:var(--cyan); font-family:var(--mono)">UPDATES INCLINATION &amp; PATH DYNAMICALLY</span>
+        </div>
+        <div class="scene-card" style="height: 240px; border-radius: 8px; position:relative; overflow:hidden">
+          <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+          <div class="scene-scale">CLICK &amp; DRAG TO ROTATE EARTH · SCROLL TO ZOOM</div>
+        </div>
+      </div>
+
+      <div class="trade-section">
         <div class="sub-heading">
-          <span class="step-badge">A</span>
+          <span class="step-badge">1</span>
           <h3>Select Target Orbit</h3>
         </div>
         <div class="trade-cards-grid" role="radiogroup" aria-label="Target Orbit Selection">
@@ -142,9 +150,9 @@ export function renderTradeSpaceStage(
         </div>
       </div>
 
-      <div class="trade-section-block">
+      <div class="trade-section" style="margin-top: 28px;">
         <div class="sub-heading">
-          <span class="step-badge">B</span>
+          <span class="step-badge">2</span>
           <h3>Select Launch Vehicle</h3>
         </div>
         <div class="trade-cards-grid" role="radiogroup" aria-label="Launch Vehicle Selection">
@@ -154,4 +162,3 @@ export function renderTradeSpaceStage(
     </section>
   `;
 }
-

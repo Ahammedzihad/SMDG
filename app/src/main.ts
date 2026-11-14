@@ -1075,7 +1075,7 @@ function mountScene() {
 function render() {
   if (mode === 'wizard') {
     if (!wizard) {
-      wizard = new MissionWizard(app);
+      wizard = new MissionWizard(app, scene);
       wizard.onExit(() => {
         mode = 'menu';
         if (wizard) {
