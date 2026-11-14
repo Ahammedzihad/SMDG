@@ -21,6 +21,7 @@ export type {
   CheckResult,
   CubeSatClass,
   EventApplied,
+  InvalidVoteRecord,
   MeterId,
   MeterItem,
   Meters,
@@ -35,13 +36,25 @@ export type {
   Orbit,
   Part,
   PartCategory,
+  PlayerDataError,
+  PlayerVote,
   RealMission,
   Report,
   RiskMatrixItem,
+  RoleAuthCheckResult,
   ScoreBreakdown,
+  SharedDecisionType,
   SimResult,
+  TeamPlayer,
+  TeamRole,
+  TeamRoleInfo,
   TimelineEntry,
-  Vehicle
+  Vehicle,
+  VoteResolutionOptions,
+  VoteResolutionParams,
+  VoteResolutionResult,
+  VoteResolutionStatus,
+  VoteTally
 } from './types.js';
 
 // Pure formulas
@@ -105,3 +118,20 @@ export { buildReport, findSimilarRealMission } from './report.js';
 
 // Resource Meters
 export { computeMeters } from './meters.js';
+
+// Team Roles, Authorization & Voting
+export {
+  ROLE_EDITABLE_CATEGORIES,
+  SHARED_DECISION_TYPES,
+  TEAM_ROLE_INFO,
+  TEAM_ROLES,
+  canRoleEditCategory,
+  checkRoleAuthorization,
+  getRoleEditableCategories,
+  getRoleForCategory,
+  isPartCategory,
+  isTeamRole,
+  resolveProposalVote,
+  resolveVotes
+} from './team.js';
+

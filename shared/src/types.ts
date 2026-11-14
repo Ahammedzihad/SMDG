@@ -231,3 +231,107 @@ export interface Meters {
   communications: MeterItem;
   time: MeterItem;
 }
+
+// --------------------------------------------------------------------------
+// Team Roles & Authorization Types
+// --------------------------------------------------------------------------
+
+export type TeamRole =
+  | 'mission_planner'
+  | 'spacecraft_engineer'
+  | 'science_lead'
+  | 'comms_budget_officer';
+
+export interface TeamRoleInfo {
+  id: TeamRole;
+  name: string;
+  description: string;
+  categories: readonly PartCategory[];
+  owns: string;
+  typicalConflict: string;
+}
+
+export interface RoleAuthCheckResult {
+  authorized: boolean;
+  role?: TeamRole;
+  category?: PartCategory;
+  reason: string;
+}
+
+// --------------------------------------------------------------------------
+// Shared Decisions & Voting Types
+// --------------------------------------------------------------------------
+
+export type SharedDecisionType =
+  | 'objective'
+  | 'orbit'
+  | 'launch_vehicle'
+  | 'final_launch'
+  | (string & {});
+
+export interface TeamPlayer {
+  id: string;
+  role: TeamRole;
+  name?: string;
+}
+
+export interface PlayerVote {
+  playerId: string;
+  choice: string;
+}
+
+export interface VoteTally {
+  choice: string;
+  votes: number;
+  voterIds: string[];
+}
+
+export interface InvalidVoteRecord {
+  vote: unknown;
+  playerId?: string;
+  choice?: unknown;
+  reason: string;
+}
+
+export interface PlayerDataError {
+  playerId?: string;
+  field: string;
+  reason: string;
+}
+
+export type VoteResolutionStatus =
+  | 'passed'
+  | 'tie'
+  | 'no_majority'
+  | 'missing_votes'
+  | 'invalid';
+
+export interface VoteResolutionOptions {
+  requireAllVotes?: boolean;
+  allowedChoices?: string[];
+  allowDuplicateRoles?: boolean;
+}
+
+export interface VoteResolutionParams {
+  decision: string;
+  players: Array<TeamPlayer | string>;
+  votes: PlayerVote[] | Record<string, string>;
+  options?: VoteResolutionOptions;
+}
+
+export interface VoteResolutionResult {
+  status: VoteResolutionStatus;
+  passed: boolean;
+  decision: string;
+  winner: string | null;
+  tallies: VoteTally[];
+  totalEligibleVoters: number;
+  votesCast: number;
+  validVotesCount: number;
+  majorityThreshold: number;
+  missingPlayerIds: string[];
+  invalidVotes: InvalidVoteRecord[];
+  playerErrors: PlayerDataError[];
+  reason: string;
+}
+
