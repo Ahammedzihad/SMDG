@@ -15,7 +15,7 @@
 }
 
 /* ==========================================================================
-   Development Mock Banner
+   Development Mock & Live Server Banners
    ========================================================================== */
 
 .mock-banner {
@@ -33,6 +33,30 @@
 .mock-badge {
   background: var(--brand-yellow);
   color: #1a1000;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.live-server-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(43, 217, 128, 0.12);
+  border: 1px solid var(--brand-green);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(43, 217, 128, 0.15);
+}
+
+.live-badge {
+  background: var(--brand-green);
+  color: #052614;
   font-family: var(--font-mono, monospace);
   font-size: 11px;
   font-weight: 800;

@@ -4,8 +4,8 @@
  * Implements the complete multiplayer lobby user interface:
  * - Entry screen (Create / Join room, callsign, preferred role)
  * - Room lobby screen (Crew roster, roles, shared decision voting, readiness checklist)
- * - Clear DEVELOPMENT MOCK badging
- * - Transport-independent interface powered by MultiplayerTransport
+ * - Live Socket.IO server support with seamless fallback to DEVELOPMENT MOCK
+ * - Reconnection testing and multi-client state synchronization
  */
 
 import './lobby.css';
@@ -18,6 +18,7 @@ import {
   type SimResultPayload
 } from '@shared';
 import type { MultiplayerTransport } from '../../multiplayer/transport';
+import { SocketIoTransport } from '../../multiplayer/socketIoTransport';
 import { MockTransport } from '../../multiplayer/mockTransport';
 import { primaryButton, secondaryButton } from '../components';
 import { renderIcon } from '../icons';
@@ -49,10 +50,11 @@ export class LobbyView {
   private isHost = false;
 
   private simResult: SimResultPayload | null = null;
+  private unsubscribers: Array<() => void> = [];
 
   constructor(container: HTMLElement, transport?: MultiplayerTransport) {
     this.container = container;
-    this.transport = transport || new MockTransport();
+    this.transport = transport || new SocketIoTransport();
 
     this.callsign =
       localStorage.getItem('mission-player-callsign') ||
@@ -66,102 +68,157 @@ export class LobbyView {
     this.onExitCallback = cb;
   }
 
+  public setTransport(newTransport: MultiplayerTransport): void {
+    this.cleanupListeners();
+    this.transport.disconnect();
+    this.transport = newTransport;
+    this.initTransportListeners();
+    void this.transport.connect().catch((err) => {
+      this.notice = `Connection error: ${err.message}`;
+      this.noticeType = 'error';
+      this.render();
+    });
+    this.render();
+  }
+
+  private cleanupListeners(): void {
+    while (this.unsubscribers.length > 0) {
+      const unsub = this.unsubscribers.pop();
+      if (unsub) unsub();
+    }
+  }
+
   private initTransportListeners(): void {
-    this.transport.on('room_created', (data) => {
-      this.localPlayerId = data.playerId;
-      this.localPlayerToken = data.playerToken;
-      this.isHost = true;
-      this.roomState = {
-        roomCode: data.roomCode,
-        players: data.players,
-        design: data.design,
-        meters: data.meters,
-        validation: data.validation,
-        activeDecision: null,
-        simStatus: 'idle',
-        version: 1
-      };
-      this.mode = 'room';
-      this.notice = `Room "${data.roomCode}" created. Crew link online.`;
-      this.noticeType = 'success';
-      this.render();
-    });
+    this.cleanupListeners();
 
-    this.transport.on('room_joined', (data) => {
-      this.localPlayerId = data.playerId;
-      this.localPlayerToken = data.playerToken;
-      this.isHost = false;
-      this.roomState = {
-        roomCode: data.roomCode,
-        players: data.players,
-        design: data.design,
-        meters: data.meters,
-        validation: data.validation,
-        activeDecision: null,
-        simStatus: 'idle',
-        version: 1
-      };
-      this.mode = 'room';
-      this.notice = `Joined room "${data.roomCode}". Team synchronized.`;
-      this.noticeType = 'success';
-      this.render();
-    });
+    this.unsubscribers.push(
+      this.transport.on('room_created', (data) => {
+        this.localPlayerId = data.playerId;
+        this.localPlayerToken = data.playerToken;
+        this.isHost = true;
 
-    this.transport.on('state_update', (data) => {
-      this.roomState = data;
-      this.render();
-    });
+        sessionStorage.setItem('orbitone-player-id', data.playerId);
+        sessionStorage.setItem('orbitone-player-token', data.playerToken);
+        sessionStorage.setItem('orbitone-room-code', data.roomCode);
 
-    this.transport.on('action_rejected', (data) => {
-      this.notice = `Action rejected: ${data.reason}`;
-      this.noticeType = 'error';
-      this.render();
-    });
-
-    this.transport.on('decision_resolved', (data: DecisionResolvedPayload) => {
-      if (data.result.passed && data.result.winner) {
-        this.notice = `Voting outcome: Decision "${data.decision}" passed! Selected "${data.result.winner}".`;
+        this.roomState = {
+          roomCode: data.roomCode,
+          players: data.players,
+          design: data.design,
+          meters: data.meters,
+          validation: data.validation,
+          activeDecision: null,
+          simStatus: 'idle',
+          version: 1
+        };
+        this.mode = 'room';
+        this.notice = `Room "${data.roomCode}" created on ${this.transport.transportLabel}. Crew link online.`;
         this.noticeType = 'success';
-      } else {
-        this.notice = `Voting outcome: Decision "${data.decision}" could not pass (${data.result.status}: ${data.result.reason}).`;
-        this.noticeType = 'warn';
-      }
-      this.render();
-    });
+        this.render();
+      })
+    );
 
-    this.transport.on('sim_result', (data: SimResultPayload) => {
-      this.simResult = data;
-      this.notice = `Mission simulation finished! Final score: ${data.score.total} pts (${data.score.rank}).`;
-      this.noticeType = 'success';
-      this.render();
-    });
+    this.unsubscribers.push(
+      this.transport.on('room_joined', (data) => {
+        this.localPlayerId = data.playerId;
+        this.localPlayerToken = data.playerToken;
+        this.isHost = data.players[0]?.id === data.playerId;
 
-    this.transport.on('error', (data) => {
-      this.notice = `Transport Error: ${data.message}`;
-      this.noticeType = 'error';
-      this.render();
-    });
+        sessionStorage.setItem('orbitone-player-id', data.playerId);
+        sessionStorage.setItem('orbitone-player-token', data.playerToken);
+        sessionStorage.setItem('orbitone-room-code', data.roomCode);
 
-    this.transport.onConnectionChange((connected) => {
-      if (!connected) {
-        this.notice = 'Network connection offline. Reconnecting…';
-        this.noticeType = 'warn';
-      } else {
-        this.notice = 'Transport connected.';
-        this.noticeType = 'info';
-      }
-      this.render();
-    });
+        this.roomState = {
+          roomCode: data.roomCode,
+          players: data.players,
+          design: data.design,
+          meters: data.meters,
+          validation: data.validation,
+          activeDecision: null,
+          simStatus: 'idle',
+          version: 1
+        };
+        this.mode = 'room';
+        this.notice = `Joined room "${data.roomCode}" on ${this.transport.transportLabel}. Team synchronized.`;
+        this.noticeType = 'success';
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.on('state_update', (data) => {
+        this.roomState = data;
+        if (this.localPlayerId && data.players && data.players.length > 0) {
+          this.isHost = data.players[0].id === this.localPlayerId;
+        }
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.on('action_rejected', (data) => {
+        this.notice = `Action rejected: ${data.reason}`;
+        this.noticeType = 'error';
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.on('decision_resolved', (data: DecisionResolvedPayload) => {
+        if (data.result.passed && data.result.winner) {
+          this.notice = `Voting outcome: Decision "${data.decision}" passed! Selected "${data.result.winner}".`;
+          this.noticeType = 'success';
+        } else {
+          this.notice = `Voting outcome: Decision "${data.decision}" could not pass (${data.result.status}: ${data.result.reason}).`;
+          this.noticeType = 'warn';
+        }
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.on('sim_result', (data: SimResultPayload) => {
+        this.simResult = data;
+        this.notice = `Mission simulation complete! Score: ${data.score.total} pts (${data.score.rank}) · Outcome: ${data.sim.outcome}`;
+        this.noticeType = 'success';
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.on('error', (data) => {
+        this.notice = `Server Message: ${data.message}`;
+        this.noticeType = 'error';
+        this.render();
+      })
+    );
+
+    this.unsubscribers.push(
+      this.transport.onConnectionChange((connected) => {
+        if (!connected) {
+          this.notice = `${this.transport.transportLabel} connection dropped. Reconnecting…`;
+          this.noticeType = 'warn';
+        } else {
+          this.notice = `Connected to ${this.transport.transportLabel}.`;
+          this.noticeType = 'info';
+        }
+        this.render();
+      })
+    );
   }
 
   public async start(): Promise<void> {
-    if (!this.transport.isConnected) {
+    try {
       await this.transport.connect();
+    } catch (err: any) {
+      this.notice = `Unable to connect to ${this.transport.transportLabel}: ${err?.message || 'Server offline'}. You can switch to DEVELOPMENT MOCK mode below.`;
+      this.noticeType = 'warn';
     }
     this.render();
   }
 
   public destroy(): void {
+    this.cleanupListeners();
     this.transport.disconnect();
     this.container.innerHTML = '';
   }
@@ -178,14 +235,37 @@ export class LobbyView {
     }
   }
 
-  private renderMockBanner(): string {
+  private getServerUrl(): string {
+    if (this.transport instanceof SocketIoTransport) {
+      return (this.transport as SocketIoTransport).url;
+    }
+    return 'http://localhost:3000';
+  }
+
+  private renderBanner(): string {
+    if (this.transport.isMock) {
+      return `
+        <aside class="mock-banner" role="status" aria-label="Development Transport Notice">
+          <span class="mock-badge">DEVELOPMENT MOCK</span>
+          <div class="mock-banner-text">
+            <strong>Offline Simulation Mode:</strong> Protocol validation running locally via pure shared engine.
+          </div>
+          <button type="button" class="button button-quiet" data-lobby-action="switch-to-live" style="margin-left:auto;font-size:11px;padding:4px 10px;">
+            Switch to Live Server
+          </button>
+        </aside>
+      `;
+    }
+
     return `
-      <aside class="mock-banner" role="status" aria-label="Development Transport Notice">
-        <span class="mock-badge">${escapeHtml(this.transport.transportLabel)}</span>
+      <aside class="live-server-banner" role="status" aria-label="Live Server Connection">
+        <span class="live-badge">● LIVE SERVER</span>
         <div class="mock-banner-text">
-          <strong>Offline Simulation Mode:</strong> Protocol validation running locally via pure shared engine.
-          Person A is implementing the live Socket.IO server on the engine branch.
+          <strong>Authoritative Game Server:</strong> Connected to Socket.IO backend at <code>${escapeHtml(this.getServerUrl())}</code>.
         </div>
+        <button type="button" class="button button-quiet" data-lobby-action="switch-to-mock" style="margin-left:auto;font-size:11px;padding:4px 10px;">
+          Switch to Mock
+        </button>
       </aside>
     `;
   }
@@ -220,7 +300,7 @@ export class LobbyView {
 
     const html = `
       <div class="lobby-container">
-        ${this.renderMockBanner()}
+        ${this.renderBanner()}
         ${this.renderNoticeBar()}
 
         <header class="page-heading">
@@ -302,7 +382,6 @@ export class LobbyView {
 
     const currentPlayers = this.roomState.players;
     const localPlayer = currentPlayers.find((p) => p.id === this.localPlayerId);
-    const takenRoles = new Set(currentPlayers.map((p) => p.role));
 
     // 1. Crew Roster HTML
     const crewHtml = currentPlayers
@@ -310,7 +389,7 @@ export class LobbyView {
         const isSelf = player.id === this.localPlayerId;
         const info = TEAM_ROLE_INFO[player.role];
         const initial = (player.name || 'C').slice(0, 1).toUpperCase();
-        const roleCategories = info.categories.length > 0
+        const roleCategories = info && info.categories.length > 0
           ? info.categories.map((c) => `<span class="cat-pill">${escapeHtml(c)}</span>`).join('')
           : '<span class="cat-pill">Mission Strategy & Sign-Off</span>';
 
@@ -325,7 +404,7 @@ export class LobbyView {
                 ${idx === 0 ? '<span class="tag-host">HOST</span>' : ''}
                 ${isSelf ? '<span class="tag-self">YOU</span>' : ''}
               </div>
-              <div class="crew-role-label">${escapeHtml(info.name)}</div>
+              <div class="crew-role-label">${escapeHtml(info?.name || player.role)}</div>
               <div class="crew-categories">${roleCategories}</div>
             </div>
             <div class="crew-status-online">
@@ -355,7 +434,7 @@ export class LobbyView {
           <div class="role-header">
             <span class="role-title">${escapeHtml(info.name)}</span>
             ${isCurrent ? '<span class="tag-self">ASSIGNED</span>' : ''}
-            ${isClaimedByOther ? `<span class="cat-pill" style="color:var(--brand-coral)">CLAIMED</span>` : ''}
+            ${isClaimedByOther ? `<span class="cat-pill" style="color:var(--brand-coral)">CLAIMED BY ${escapeHtml(claimedBy.name || 'CREW')}</span>` : ''}
           </div>
           <div class="role-desc">${escapeHtml(info.description)}</div>
           <div class="role-conflict">Conflict: ${escapeHtml(info.typicalConflict)}</div>
@@ -387,6 +466,8 @@ export class LobbyView {
         })
         .join('');
 
+      const isMock = this.transport.isMock;
+
       votingHtml = `
         <div class="vote-active-box">
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -408,11 +489,15 @@ export class LobbyView {
             <span>Awaiting: <strong>${active.missingPlayerIds.length}</strong> voter(s)</span>
           </div>
 
-          <div style="display:flex;gap:10px;margin-top:4px;">
-            <button type="button" class="button button-quiet" style="font-size:11px;padding:6px 12px" data-lobby-action="simulate-peer-vote">
-              ⚡ Dev: Simulate Peer Vote
-            </button>
-          </div>
+          ${
+            isMock
+              ? `<div style="display:flex;gap:10px;margin-top:4px;">
+                   <button type="button" class="button button-quiet" style="font-size:11px;padding:6px 12px" data-lobby-action="simulate-peer-vote">
+                     ⚡ Dev: Simulate Peer Vote
+                   </button>
+                 </div>`
+              : ''
+          }
         </div>
       `;
     } else {
@@ -442,9 +527,33 @@ export class LobbyView {
     const checksPassed = this.roomState.validation.passed;
     const isReadyToStart = hasMinPlayers && hasDistinctRoles && checksPassed;
 
+    // 5. Simulation Results Card (if completed)
+    let simResultHtml = '';
+    if (this.simResult) {
+      simResultHtml = `
+        <div class="panel glass-card" style="border:1px solid var(--brand-green);background:rgba(43,217,128,0.12);">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-index" style="color:var(--brand-green)">MISSION SIMULATION RESULTS (SERVER AUTHORITATIVE)</span>
+              <h2>Outcome: ${escapeHtml(this.simResult.sim.outcome.replace(/_/g, ' ').toUpperCase())}</h2>
+            </div>
+            <span class="tag-host">${escapeHtml(this.simResult.score.rank)} (${this.simResult.score.total} PTS)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;font-size:12px;margin-top:8px;">
+            <div><span style="color:var(--text-muted)">Science Return:</span> <strong>${this.simResult.sim.science_collected.toFixed(1)}</strong></div>
+            <div><span style="color:var(--text-muted)">Data Transmitted:</span> <strong>${this.simResult.sim.data_transmitted_total_gb.toFixed(1)} GB</strong></div>
+            <div><span style="color:var(--text-muted)">Final Health:</span> <strong>${(this.simResult.sim.final_health * 100).toFixed(0)}%</strong></div>
+            <div><span style="color:var(--text-muted)">Lifetime:</span> <strong>${this.simResult.sim.lifetime_months} months</strong></div>
+          </div>
+        </div>
+      `;
+    }
+
+    const isMock = this.transport.isMock;
+
     const html = `
       <div class="lobby-container">
-        ${this.renderMockBanner()}
+        ${this.renderBanner()}
         ${this.renderNoticeBar()}
 
         <header class="room-header">
@@ -466,6 +575,8 @@ export class LobbyView {
         <main class="room-layout">
           <!-- Left Column: Manifest, Roles, Voting -->
           <section style="display:flex;flex-direction:column;gap:20px;">
+            ${simResultHtml}
+
             <!-- Manifest -->
             <div class="panel glass-card">
               <div class="panel-heading">
@@ -543,25 +654,37 @@ export class LobbyView {
 
           <!-- Right Column: Dev Controls & Live Telemetry -->
           <aside style="display:flex;flex-direction:column;gap:20px;">
-            <!-- Developer Controls -->
+            <!-- Connection & Diagnostic Tools -->
             <div class="dev-tools-card">
-              <h4>Developer Simulation Tools</h4>
+              <h4>${isMock ? 'Developer Simulation Tools' : 'Multiplayer Diagnostics'}</h4>
               <p style="margin:0;font-size:11px;color:var(--text-muted);line-height:1.4">
-                Test multiplayer scenarios and edge cases locally while Person A finishes the live Socket.IO backend:
+                ${
+                  isMock
+                    ? 'Simulate multiplayer protocol events and peer activities offline:'
+                    : `Active connection to authoritative server at ${escapeHtml(this.getServerUrl())}. Open a second browser client to join room "${escapeHtml(this.roomState.roomCode)}".`
+                }
               </p>
               <div class="dev-actions-grid">
+                <button type="button" class="dev-btn" data-lobby-action="test-reconnect">
+                  ↻ Test Disconnect & Reconnect
+                </button>
                 ${
-                  currentPlayers.length < 4
-                    ? '<button type="button" class="dev-btn" data-lobby-action="sim-join-peer">+ Simulate Peer Join (Cadet Alex)</button>'
+                  isMock
+                    ? `
+                      ${
+                        currentPlayers.length < 4
+                          ? '<button type="button" class="dev-btn" data-lobby-action="sim-join-peer">+ Simulate Peer Join (Cadet Alex)</button>'
+                          : ''
+                      }
+                      ${
+                        currentPlayers.length > 1
+                          ? '<button type="button" class="dev-btn" data-lobby-action="sim-leave-peer">- Simulate Peer Disconnect</button>'
+                          : ''
+                      }
+                      <button type="button" class="dev-btn" data-lobby-action="sim-error">⚠ Simulate Network Error</button>
+                    `
                     : ''
                 }
-                ${
-                  currentPlayers.length > 1
-                    ? '<button type="button" class="dev-btn" data-lobby-action="sim-leave-peer">- Simulate Peer Disconnect</button>'
-                    : ''
-                }
-                <button type="button" class="dev-btn" data-lobby-action="sim-error">⚠ Simulate Network Error</button>
-                <button type="button" class="dev-btn" data-lobby-action="sim-reconnect">↻ Simulate Reconnection Cycle</button>
               </div>
             </div>
 
@@ -663,6 +786,14 @@ export class LobbyView {
       this.onExitCallback();
     });
 
+    this.container.querySelector('[data-lobby-action="switch-to-mock"]')?.addEventListener('click', () => {
+      this.setTransport(new MockTransport());
+    });
+
+    this.container.querySelector('[data-lobby-action="switch-to-live"]')?.addEventListener('click', () => {
+      this.setTransport(new SocketIoTransport());
+    });
+
     this.bindCommonDismissNotice();
   }
 
@@ -685,6 +816,7 @@ export class LobbyView {
       this.localPlayerId = '';
       this.localPlayerToken = '';
       this.isHost = false;
+      this.simResult = null;
       this.notice = 'You departed the room lobby.';
       this.noticeType = 'info';
       this.render();
@@ -777,7 +909,50 @@ export class LobbyView {
       }
     });
 
-    // Developer Mock Controls
+    // Test Disconnect and Reconnect
+    this.container.querySelector('[data-lobby-action="test-reconnect"]')?.addEventListener('click', async () => {
+      if (!this.roomState) return;
+      const roomCode = this.roomState.roomCode;
+      const playerId = this.localPlayerId;
+      const playerToken = this.localPlayerToken;
+
+      this.notice = 'Simulating network drop… disconnecting socket.';
+      this.noticeType = 'warn';
+      this.render();
+
+      this.transport.disconnect();
+
+      setTimeout(async () => {
+        try {
+          await this.transport.connect();
+          this.notice = 'Reconnecting with session credentials…';
+          this.render();
+
+          await this.transport.send('join_room', {
+            roomCode,
+            playerName: this.callsign,
+            playerId,
+            playerToken,
+            preferredRole: this.preferredRole
+          });
+        } catch (err: any) {
+          this.notice = `Reconnection failed: ${err.message}`;
+          this.noticeType = 'error';
+          this.render();
+        }
+      }, 800);
+    });
+
+    // Switch transport buttons
+    this.container.querySelector('[data-lobby-action="switch-to-mock"]')?.addEventListener('click', () => {
+      this.setTransport(new MockTransport());
+    });
+
+    this.container.querySelector('[data-lobby-action="switch-to-live"]')?.addEventListener('click', () => {
+      this.setTransport(new SocketIoTransport());
+    });
+
+    // Developer Mock Controls (available in mock mode)
     const mock = this.transport instanceof MockTransport ? (this.transport as MockTransport) : null;
 
     this.container.querySelector('[data-lobby-action="simulate-peer-vote"]')?.addEventListener('click', () => {
@@ -819,15 +994,6 @@ export class LobbyView {
       }
     });
 
-    this.container.querySelector('[data-lobby-action="sim-reconnect"]')?.addEventListener('click', () => {
-      if (mock) {
-        this.notice = 'Cycling connection…';
-        this.noticeType = 'warn';
-        this.render();
-        mock.simulateDisconnectAndReconnect(500);
-      }
-    });
-
     this.bindCommonDismissNotice();
   }
 
@@ -839,4 +1005,3 @@ export class LobbyView {
     });
   }
 }
-
