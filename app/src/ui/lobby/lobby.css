@@ -1,0 +1,571 @@
+/**
+ * ORBITONE Multiplayer Lobby Styles
+ * Friendly space cartoon aesthetic with glass-morphic cards,
+ * vibrant role accents, and clear development mock badging.
+ */
+
+.lobby-container {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ==========================================================================
+   Development Mock & Live Server Banners
+   ========================================================================== */
+
+.mock-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 184, 0, 0.12);
+  border: 1px solid var(--brand-yellow);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 184, 0, 0.15);
+}
+
+.mock-badge {
+  background: var(--brand-yellow);
+  color: #1a1000;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.live-server-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(43, 217, 128, 0.12);
+  border: 1px solid var(--brand-green);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(43, 217, 128, 0.15);
+}
+
+.live-badge {
+  background: var(--brand-green);
+  color: #052614;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.mock-banner-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.mock-banner-text strong {
+  color: #fff;
+}
+
+/* ==========================================================================
+   Lobby Entry View (Create / Join)
+   ========================================================================== */
+
+.lobby-entry-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.entry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.entry-card h2 {
+  font-size: 20px;
+  color: #fff;
+  margin: 0;
+}
+
+.entry-card p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-group label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--brand-cyan);
+  text-transform: uppercase;
+}
+
+.field-group input,
+.field-group select {
+  background: rgba(8, 14, 38, 0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-group input:focus,
+.field-group select:focus {
+  outline: none;
+  border-color: var(--brand-cyan);
+  box-shadow: 0 0 12px var(--brand-cyan-glow);
+}
+
+.room-code-input {
+  font-family: var(--font-mono, monospace) !important;
+  font-size: 20px !important;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Room Lobby Layout
+   ========================================================================== */
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.room-meta-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.room-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 2px solid var(--brand-cyan);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  box-shadow: 0 0 16px var(--brand-cyan-glow);
+}
+
+.room-code-badge .label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--brand-cyan);
+}
+
+.room-code-badge .code {
+  font-family: var(--font-mono, monospace);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #fff;
+}
+
+.room-code-badge button {
+  background: rgba(77, 226, 255, 0.15);
+  border: 1px solid var(--brand-cyan);
+  color: var(--brand-cyan);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.room-code-badge button:hover {
+  background: var(--brand-cyan);
+  color: #042431;
+}
+
+.room-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+}
+
+@media (max-width: 1080px) {
+  .room-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Crew Roster
+   ========================================================================== */
+
+.crew-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.crew-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  transition: all 0.2s ease;
+}
+
+.crew-card.is-self {
+  border-color: var(--brand-cyan);
+  background: rgba(28, 48, 105, 0.85);
+  box-shadow: 0 4px 20px rgba(77, 226, 255, 0.12);
+}
+
+.crew-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-cyan);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.crew-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.crew-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crew-name-row strong {
+  font-size: 15px;
+  color: #fff;
+}
+
+.tag-host {
+  background: var(--brand-yellow);
+  color: #1a1000;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.5px;
+}
+
+.tag-self {
+  background: rgba(77, 226, 255, 0.2);
+  color: var(--brand-cyan);
+  border: 1px solid var(--brand-cyan);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.crew-role-label {
+  font-size: 13px;
+  color: var(--brand-cyan);
+  font-weight: 600;
+}
+
+.crew-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.cat-pill {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.crew-status-online {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--brand-green);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Role Selection Section
+   ========================================================================== */
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.role-card-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  color: inherit;
+}
+
+.role-card-btn:hover:not(:disabled) {
+  border-color: var(--brand-cyan);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.role-card-btn.is-active {
+  border-color: var(--brand-yellow);
+  background: rgba(35, 58, 126, 0.95);
+  box-shadow: 0 0 16px var(--brand-yellow-glow);
+}
+
+.role-card-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.role-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.role-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.role-conflict {
+  font-size: 10px;
+  color: var(--brand-coral);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Shared Voting Panel
+   ========================================================================== */
+
+.voting-panel {
+  background: rgba(18, 29, 66, 0.72);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vote-active-box {
+  background: rgba(12, 21, 53, 0.8);
+  border: 1px solid var(--brand-cyan);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(77, 226, 255, 0.15);
+}
+
+.vote-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.vote-opt-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  color: #fff;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.vote-opt-btn:hover:not(:disabled) {
+  border-color: var(--brand-cyan);
+  background: rgba(77, 226, 255, 0.15);
+}
+
+.vote-opt-btn.is-voted {
+  border-color: var(--brand-green);
+  background: var(--brand-green-bg);
+  color: #fff;
+}
+
+.vote-tally-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--glass-border);
+  padding-top: 10px;
+}
+
+/* ==========================================================================
+   Readiness Checklist & Actions
+   ========================================================================== */
+
+.readiness-card {
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gate-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gate-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.gate-item.is-pass {
+  color: #fff;
+}
+
+.gate-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.gate-icon.is-pass {
+  background: var(--brand-green-bg);
+  border: 1px solid var(--brand-green);
+  color: var(--brand-green);
+}
+
+.gate-icon.is-fail {
+  background: var(--brand-coral-bg);
+  border: 1px solid var(--brand-coral);
+  color: var(--brand-coral);
+}
+
+/* ==========================================================================
+   Developer Simulation Panel
+   ========================================================================== */
+
+.dev-tools-card {
+  background: rgba(255, 184, 0, 0.06);
+  border: 1px dashed var(--brand-yellow);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dev-tools-card h4 {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--brand-yellow);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.dev-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dev-btn {
+  background: rgba(255, 184, 0, 0.12);
+  border: 1px solid rgba(255, 184, 0, 0.4);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.dev-btn:hover {
+  background: rgba(255, 184, 0, 0.25);
+  border-color: var(--brand-yellow);
+}
+

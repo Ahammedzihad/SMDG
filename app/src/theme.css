@@ -1,0 +1,518 @@
+/**
+ * ORBITONE Theme System
+ * Friendly, colourful "space cartoon" aesthetic.
+ * Chunky rounded buttons, glass-like cards, star rank, and glowing mission path.
+ */
+
+:root {
+  /* ========================================================================
+     Space Gradient & Background Tokens
+     ======================================================================== */
+  --bg-space: radial-gradient(circle at 50% 15%, #132252 0%, #09102b 50%, #040716 100%);
+  --bg-deep: #050816;
+  --bg-surface: #0c1535;
+  --bg-surface-elevated: #111d47;
+  
+  /* Glass Card Tokens */
+  --bg-card: rgba(18, 29, 66, 0.72);
+  --bg-card-hover: rgba(28, 44, 98, 0.85);
+  --bg-card-selected: rgba(35, 58, 126, 0.95);
+  --glass-border: rgba(110, 180, 255, 0.22);
+  --glass-border-hover: rgba(120, 200, 255, 0.45);
+  --glass-border-glow: rgba(77, 226, 255, 0.6);
+  --glass-blur: blur(14px);
+
+  /* ========================================================================
+     5 Core Brand Colours
+     ======================================================================== */
+  /* 1. Solar Gold (Primary Warm Accent / Stars / Action) */
+  --brand-yellow: #ffb800;
+  --brand-yellow-hover: #ffc726;
+  --brand-yellow-active: #e59e00;
+  --brand-yellow-shadow: #cc8400;
+  --brand-yellow-text: #1a1000; /* WCAG AAA 11.2:1 contrast against #ffb800 */
+  --brand-yellow-glow: rgba(255, 184, 0, 0.35);
+
+  /* 2. Orbit Blue (Secondary Action / Navigation / Structures) */
+  --brand-blue: #2f80ed;
+  --brand-blue-hover: #4ea1ff;
+  --brand-blue-active: #206bd1;
+  --brand-blue-shadow: #1952a5;
+  --brand-blue-text: #ffffff; /* WCAG AA 4.7:1 contrast against #2f80ed */
+  --brand-blue-glow: rgba(47, 128, 237, 0.35);
+
+  /* 3. Plasma Cyan (Energy / Highlights / Active Nodes) */
+  --brand-cyan: #4de2ff;
+  --brand-cyan-dim: #1e7a96;
+  --brand-cyan-shadow: #129ebf;
+  --brand-cyan-text: #042431;
+  --brand-cyan-glow: rgba(77, 226, 255, 0.4);
+
+  /* 4. Astro Green (Success / Cleared / Verified) */
+  --brand-green: #2bd980;
+  --brand-green-hover: #43e693;
+  --brand-green-shadow: #1ea860;
+  --brand-green-bg: rgba(43, 217, 128, 0.16);
+  --brand-green-text: #052614;
+  --brand-green-glow: rgba(43, 217, 128, 0.35);
+
+  /* 5. Nebula Coral / Red (Alert / Anomaly / Failure) */
+  --brand-coral: #ff5757;
+  --brand-coral-hover: #ff7070;
+  --brand-coral-shadow: #c73636;
+  --brand-coral-bg: rgba(255, 87, 87, 0.16);
+  --brand-coral-text: #ffffff;
+  --brand-coral-glow: rgba(255, 87, 87, 0.35);
+
+  /* Legacy & Semantic Aliases */
+  --cyan: var(--brand-cyan);
+  --cyan-dim: var(--brand-cyan-dim);
+  --cyan-glow: var(--brand-cyan-glow);
+  --green: var(--brand-green);
+  --green-bg: var(--brand-green-bg);
+  --yellow: var(--brand-yellow);
+  --yellow-bg: rgba(255, 184, 0, 0.15);
+  --red: var(--brand-coral);
+  --red-bg: var(--brand-coral-bg);
+
+  /* Text & Border Tokens */
+  --text-main: #f8fbff;
+  --text-muted: #a3b3d1;
+  --text-subtle: #6e7f9e;
+  --border-light: rgba(255, 255, 255, 0.14);
+  --border-focus: var(--brand-yellow);
+
+  /* ========================================================================
+     Radii Scale (Friendly & Rounded)
+     ======================================================================== */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  /* ========================================================================
+     Shadow & Elevation Tokens
+     ======================================================================== */
+  --shadow-sm: 0 3px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.65);
+  --shadow-card: 0 10px 30px rgba(0, 4, 18, 0.45);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 3px var(--brand-yellow), 0 0 0 6px rgba(77, 226, 255, 0.45);
+
+  /* ========================================================================
+     Spacing Scale
+     ======================================================================== */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ========================================================================
+     Typography (System Fallback Stacks)
+     ======================================================================== */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* ==========================================================================
+   Base Layout & Theme Enforcements
+   ========================================================================== */
+
+body,
+.orbitone-game-shell,
+.app-shell {
+  background: var(--bg-space);
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  min-height: 100vh;
+}
+
+/* Accessible High-Contrast Focus States */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: none !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+/* ==========================================================================
+   Chunky 3D Button Styles (Primary Yellow & Secondary Blue)
+   ========================================================================== */
+
+.button,
+.btn-chunky {
+  font-family: var(--font-family);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  text-decoration: none;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, background 0.15s ease;
+  user-select: none;
+}
+
+/* Primary Button: Solar Gold / Chunky 3D */
+.button-primary,
+.btn-primary {
+  background: linear-gradient(180deg, #ffc726 0%, var(--brand-yellow) 100%);
+  color: var(--brand-yellow-text);
+  box-shadow: 0 4px 0 var(--brand-yellow-shadow), 0 8px 18px var(--brand-yellow-glow);
+}
+
+.button-primary:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffd34d 0%, #ffc01a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--brand-yellow-shadow), 0 12px 24px var(--brand-yellow-glow);
+}
+
+.button-primary:active:not(:disabled),
+.btn-primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--brand-yellow-shadow), 0 4px 10px var(--brand-yellow-glow);
+}
+
+/* Secondary Button: Cosmic Blue / Chunky 3D */
+.button-secondary,
+.btn-secondary {
+  background: linear-gradient(180deg, #4ea1ff 0%, var(--brand-blue) 100%);
+  color: var(--brand-blue-text);
+  box-shadow: 0 4px 0 var(--brand-blue-shadow), 0 8px 18px var(--brand-blue-glow);
+}
+
+.button-secondary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #68b0ff 0%, #3a8df5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--brand-blue-shadow), 0 12px 24px var(--brand-blue-glow);
+}
+
+.button-secondary:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--brand-blue-shadow), 0 4px 10px var(--brand-blue-glow);
+}
+
+/* Quiet / Glass Button */
+.button-quiet,
+.btn-quiet {
+  background: rgba(18, 29, 66, 0.6);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.button-quiet:hover:not(:disabled),
+.btn-quiet:hover:not(:disabled) {
+  background: rgba(28, 44, 98, 0.85);
+  border-color: var(--brand-cyan);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 0 14px var(--brand-cyan-glow);
+}
+
+.button-disabled,
+.button-launch-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Special Big Launch Button */
+.button-launch {
+  background: linear-gradient(180deg, #43e693 0%, var(--brand-green) 100%);
+  color: var(--brand-green-text);
+  font-size: 15px;
+  padding: 16px 32px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 5px 0 var(--brand-green-shadow), 0 10px 24px var(--brand-green-glow);
+}
+
+.button-launch:hover {
+  background: linear-gradient(180deg, #5df0a6 0%, #34e08a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--brand-green-shadow), 0 14px 30px var(--brand-green-glow);
+}
+
+.button-launch:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--brand-green-shadow);
+}
+
+/* ==========================================================================
+   Glass-Like Cards
+   ========================================================================== */
+
+.glass-card,
+.panel,
+.stage-card,
+.metric-card,
+.scene-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover,
+.stage-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 14px 36px rgba(0, 4, 20, 0.6);
+}
+
+.stage-card.is-selected {
+  background: var(--bg-card-selected);
+  border-color: var(--brand-cyan);
+  box-shadow: 0 0 20px var(--brand-cyan-glow), var(--shadow-card);
+}
+
+/* ==========================================================================
+   Mission Path (Glowing Progress Highway)
+   ========================================================================== */
+
+.mission-path-nav {
+  background: rgba(12, 21, 53, 0.7);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-light);
+  padding: 14px 24px;
+  position: relative;
+  overflow-x: auto;
+}
+
+.mission-path-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  min-width: 680px;
+}
+
+.mission-path-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-50%);
+  z-index: 1;
+  border-radius: var(--radius-pill);
+}
+
+.mission-path-progress-line {
+  position: absolute;
+  top: 50%;
+  left: 30px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--brand-cyan), var(--brand-yellow));
+  transform: translateY(-50%);
+  z-index: 2;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 12px var(--brand-cyan-glow);
+  transition: width 0.3s ease;
+}
+
+.mission-path-node {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: transform 0.15s ease;
+}
+
+.mission-path-node:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.mission-path-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface-elevated);
+  border: 2px solid var(--border-light);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.mission-path-node.is-done .mission-path-bubble {
+  background: var(--brand-cyan);
+  border-color: var(--brand-cyan);
+  color: #042431;
+  box-shadow: 0 0 14px var(--brand-cyan-glow);
+}
+
+.mission-path-node.is-current .mission-path-bubble {
+  background: linear-gradient(135deg, #ffd34d, var(--brand-yellow));
+  border-color: #ffffff;
+  color: #1a1000;
+  transform: scale(1.15);
+  box-shadow: 0 0 20px var(--brand-yellow-glow), 0 0 0 4px rgba(255, 184, 0, 0.35);
+}
+
+.mission-path-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.mission-path-node.is-current .mission-path-label {
+  color: var(--brand-yellow);
+  font-weight: 800;
+  text-shadow: 0 0 10px var(--brand-yellow-glow);
+}
+
+.mission-path-node.is-done .mission-path-label {
+  color: var(--brand-cyan);
+}
+
+/* ==========================================================================
+   Star Rank Display Component
+   ========================================================================== */
+
+.star-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(18, 29, 66, 0.85);
+  border: 1px solid var(--brand-yellow-shadow);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 16px var(--brand-yellow-glow);
+}
+
+.star-rank-cluster {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star-rank-star {
+  display: inline-flex;
+  color: var(--brand-yellow);
+  filter: drop-shadow(0 0 4px var(--brand-yellow-glow));
+}
+
+.star-rank-name {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Chunky Progress Bar Component
+   ========================================================================== */
+
+.chunky-progress-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chunky-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.chunky-progress-track {
+  width: 100%;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  padding: 2px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.chunky-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--brand-cyan), var(--brand-green));
+  box-shadow: 0 0 12px var(--brand-green-glow);
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chunky-progress-fill.fill-yellow {
+  background: linear-gradient(90deg, #ffc726, var(--brand-yellow));
+  box-shadow: 0 0 12px var(--brand-yellow-glow);
+}
+
+.chunky-progress-fill.fill-coral {
+  background: linear-gradient(90deg, #ff7a7a, var(--brand-coral));
+  box-shadow: 0 0 12px var(--brand-coral-glow);
+}
+
+/* ==========================================================================
+   Accessibility & Responsive Constraints
+   ========================================================================== */
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 1024x768 Safe Scaling */
+@media (max-width: 1024px) {
+  .wizard-workspace-grid,
+  .sim-layout,
+  .debrief-layout,
+  .home-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
