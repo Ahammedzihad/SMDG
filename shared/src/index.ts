@@ -135,3 +135,77 @@ export {
   resolveVotes
 } from './team.js';
 
+// Client/Server Protocol Contract
+export {
+  CLIENT_INTENTS,
+  SERVER_MESSAGES,
+  actionRejectedPayloadSchema,
+  actionRejectionCodeSchema,
+  activeDecisionStateSchema,
+  checkResultSchema,
+  clientIntentSchemas,
+  createRoomPayloadSchema,
+  decisionResolvedPayloadSchema,
+  editPartPayloadSchema,
+  errorPayloadSchema,
+  isClientIntent,
+  isServerMessage,
+  joinRoomPayloadSchema,
+  meterIdSchema,
+  meterItemSchema,
+  metersSchema,
+  meterStateSchema,
+  missionDesignSchema,
+  missionValidationResultSchema,
+  parseClientIntent,
+  parseServerMessage,
+  proposeDecisionPayloadSchema,
+  reportSchema,
+  roomCreatedPayloadSchema,
+  roomJoinedPayloadSchema,
+  safeParseClientIntent,
+  safeParseServerMessage,
+  scoreBreakdownSchema,
+  serverErrorPayloadSchema,
+  serverMessageSchemas,
+  setRolePayloadSchema,
+  sharedDecisionTypeSchema,
+  simResultPayloadSchema,
+  simResultSchema,
+  startSimPayloadSchema,
+  stateUpdatePayloadSchema,
+  teamPlayerSchema,
+  teamRoleSchema,
+  votePayloadSchema,
+  voteResolutionResultSchema,
+  voteTallySchema
+} from './protocol.js';
+
+export type {
+  ActionRejectedPayload,
+  ActionRejectionCode,
+  ActiveDecisionState,
+  ClientIntent,
+  ClientIntentMap,
+  ClientMessageEnvelope,
+  CreateRoomPayload,
+  DecisionResolvedPayload,
+  EditPartPayload,
+  ErrorPayload,
+  JoinRoomPayload,
+  ProposeDecisionPayload,
+  RoomCreatedPayload,
+  RoomJoinedPayload,
+  ServerErrorPayload,
+  ServerMessage,
+  ServerMessageEnvelope,
+  ServerMessageMap,
+  SetRolePayload,
+  SimResultPayload,
+  StartSimPayload,
+  StateUpdatePayload,
+  VotePayload
+} from './protocol.js';
+
+
+
