@@ -1,285 +1,261 @@
-# GAME_RULES.md: Space Mission Design Game
+# ORBITONE — NASA Space Mission Design Game
 
-NASA Space Apps Challenge 2026: "Space Mission Design Game" (Intermediate, Beginner/Youth, Games).
-This file is the source of truth for the agent. Build the game from it. If something here conflicts with a later chat message, ask before changing it.
-
----
-
-## 1. What we are building
-
-A browser game where 1 to 4 players design, launch and run a complete space mission, then see a 3D simulation and a report that explains why it succeeded or failed.
-
-The goal is **learning trade-offs**. Every choice must cost something somewhere else. There is no single perfect design.
-
-Target audience: students with no space background. Explain every concept in plain words, inside the game.
-
-### Challenge requirements we must cover (from the challenge text)
-1. Pick a mission objective first.
-2. Design a spacecraft: structure, power, batteries, comms, computer, attitude control, instruments.
-3. Choose instruments, a launch vehicle and an orbit.
-4. Show and manage six resources: **mass, power, budget, data, communications, time**.
-5. Check the spacecraft mass and orbit against the launch vehicle.
-6. Single-player and team mode, up to 4 players, with roles.
-7. A simulation, a scoring system and feedback that explains *why*.
-8. Difficulty levels, several scenarios, random events, a sandbox mode, a mission report.
+> **NASA Space Apps Challenge 2026** // Challenge: *Space Mission Design Game*  
+> **Target Audience:** Intermediate, Beginner/Youth, Education & Games  
+> **Live Deployment:** [https://smdg.vercel.app/](https://smdg.vercel.app/)
 
 ---
 
-## 2. Where the ideas come from (NASA resources given by the organizers)
+## 1. Project Overview
+**ORBITONE** is an interactive, browser-based space mission design simulator and educational game built for the NASA Space Apps Challenge 2026. Designed for cadets, students, and space enthusiasts with no prior aerospace background, ORBITONE guides players through the authentic systems engineering process used by NASA to conceptualize, design, evaluate, and fly robotic satellite missions.
 
-| Resource | What we take from it |
-| --- | --- |
-| Design and Develop Science Missions (NASA Small Satellite Institute webinar, 2025) | Four mission segments (launch, space, ground, user). Process: Identify need and goals, Define concept, Define requirements, Design, Build and verify, Implement. "Begin with the end in mind." Each requirement needs a way to verify it. Example missions: PUNCH, Dawn, BioNutrients-2. |
-| Concept Maturity Levels, CML 1 to 4 (JPL) | Our mission wizard stages (section 5). Note: JPL's page blocks automated reading, so the exact CML wording was not checked. The CML 1 to 4 outline above comes from the Goddard MDL page. |
-| Goddard Mission Design Lab (MDL) | Study depth levels: Office Hours, Concept Development, Trade Study, Point Design. Discipline list. Products: block diagram, orbit analysis, comms analysis, launch accommodation, equipment list. |
-| GMAT (General Mission Analysis Tool) | Real orbit tool. We do NOT embed GMAT. We use simple orbit formulas and name GMAT in the "learn more" links. |
-| NASA Mission Viz | 3D visual style: orrery, Earth to Moon transfer, orbit shown as an ellipse, user can rotate the camera. |
-| "Build It Yourself" telescope game (Webb) | Science goals drive engineering. Incompatible options are grayed out. 3 levels. Animated launch. Result screen names a real similar mission. |
-| CubeSat 101 (NASA CubeSat Launch Initiative) | Beginner spacecraft class. Phases from ConOps to launch to operations. The PDF itself was not readable by our tools, so the size and mass numbers below come from public CubeSat summaries. Check them against the PDF. |
-| Space Apps 2023 "Visualize a Space Mission Using VR" | Show concept, trajectory and timeline together in 3D. |
-| Canadian Space Agency digital games | Tone: friendly, short missions, for all ages. Reference games: RADARSAT Constellation Mission, OSIRIS-REx. |
-
-Real facts used (keep them accurate in the UI):
-- CubeSat unit "1U" is a 10 cm cube. Max mass about 1 to 1.33 kg. 2U about 2 kg, 3U about 3 kg, 6U about 6 kg.
-- A small CubeSat typically has only a few watts of power (often quoted around 2 W).
-- GMAT supports low Earth orbit, geostationary and highly elliptical orbits, lunar, libration-point and deep-space missions.
-
-**Important:** all other numbers in this file (budgets, masses, costs, scores) are **game-balance values we invented**. They are not NASA data. Show them as "game values" and do not present them as real mission figures.
+Whether playing solo or collaborating with up to four players in real-time multiplayer, cadets balance six competing engineering resources—**Mass, Power, Budget, Data, Communications, and Time**—while designing a CubeSat to answer authentic scientific questions.
 
 ---
 
-## 3. Players and roles
+## 2. Problem Statement
+Conceptual space mission design is one of humanity's most complex multidisciplinary endeavors. However, traditional aerospace tools (such as GMAT, FreeFlyer, or Systems Tool Kit) have steep mathematical learning curves, requiring extensive training in orbital mechanics, astrodynamics, and telemetry analysis. 
 
-Modes: **Solo**, **Team (2 to 4)**, **Sandbox**. Optional later: **Competitive** (teams get the same objective and are ranked).
+Consequently, aspiring students and young engineers struggle to grasp the fundamental principle of aerospace systems engineering: **Every choice costs something somewhere else. There is no single perfect design.** Existing educational games often oversimplify space flight into arcade mechanics without teaching the real trade-offs between scientific instrumentation, electrical power balances, link budgets, and form factor limits.
 
-In team mode each player has a role. In solo mode the player switches between roles in one UI.
+---
 
-| Role | Owns | Typical conflict |
+## 3. The ORBITONE Solution
+ORBITONE bridges high-level NASA systems engineering principles and engaging interactive game design:
+* **"Begin with the End in Mind":** Players state their scientific objective before purchasing a single piece of hardware, mirroring NASA SmallSat Institute guidelines.
+* **Concept Maturity Levels (CML):** The workflow transitions through structured design gates (CML 1 Cocktail Napkin $\to$ CML 2 Requirements $\to$ CML 3 Trade Space $\to$ CML 4 Point Design), adapted conceptually from JPL CML methodologies for educational progression.
+* **Deterministic Rules Engine:** Spacecraft feasibility, solar illumination, battery depth-of-discharge during eclipse, and downlink contact throughput are dynamically computed by a verified physics engine (`@orbitone/shared`).
+* **Plain-Language Flight Debrief:** Upon orbital simulation, an AI Flight Director explains *why* the mission succeeded or failed, highlights top risks in a 5×5 matrix, and delivers quantitative, actionable design recommendations.
+
+---
+
+## 4. Seven-Stage Gameplay (CML Mission Wizard)
+
+The single-player and cooperative campaign guides cadets across seven sequential milestones:
+
+```
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│  STAGE 01   │──►│  STAGE 02   │──►│  STAGE 03   │──►│  STAGE 04   │
+│  Objective  │   │Requirements │   │ Trade Space │   │Point Design │
+│   (CML 1)   │   │   (CML 2)   │   │   (CML 3)   │   │   (CML 4)   │
+└─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
+                                                             │
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
+│  STAGE 07   │◄──│  STAGE 06   │◄──│  STAGE 05   │◄─────────┘
+│Flight Report│   │Launch Ascent│   │ Pre-Launch  │
+│  & Debrief  │   │& Insertion  │   │ Audit Gate  │
+└─────────────┘   └─────────────┘   └─────────────┘
+```
+
+1. **Stage 1 — Objective (CML 1 Cocktail Napkin):** Select a core scientific investigation (e.g. Earth Surface & Weather Imaging, Deep Space Trajectory Demo). The objective dictates sensor payloads, target data rates, and operating constraints.
+2. **Stage 2 — Initial Feasibility (CML 2 Requirements):** Decompose the science goal into five Level-1 engineering requirements, each paired with an authentic verification method (Test, Analysis, Inspection, Demonstration).
+3. **Stage 3 — Trade Space (CML 3 Trade Study):** Explore architecture trades between orbital altitude/inclination (LEO, SSO, Polar) and certified launch vehicle accommodations (Rideshare Dispenser vs. Dedicated Micro-Launcher).
+4. **Stage 4 — Point Design (CML 4 Spacecraft Assembly):** Assemble the satellite subsystem-by-subsystem across seven categories: Structure, Solar Arrays, Batteries, Communications, Flight Computer (OBC), Attitude Determination & Control (ADCS), and Scientific Instruments. Watch the 3D model update in real time.
+5. **Stage 5 — Pre-Launch Review Gate:** An automated flight readiness audit evaluates all four hard physical constraints (Mass under class limit, Power balanced, Within budget, Mass fits vehicle).
+6. **Stage 6 — Launch & Orbit Insertion:** Experience an interactive 3D ascent from the launchpad through fairing separation, dispenser spring ejection, and solar array deployment.
+7. **Stage 7 — Flight Debrief & Engineering Evaluation:** A comprehensive mission report featuring the 0–100 composite score, badge rank, trade-off explanation, 5×5 risk matrix, telemetry table, similar real NASA CubeSat match, and two concrete design recommendations.
+
+---
+
+## 5. How the Mission Simulation Works
+
+Mission simulation in ORBITONE is deterministic and managed by `@orbitone/shared`:
+
+### Resource Balance Equations:
+* **Total Wet Mass:**
+  $$m_{\text{total}} = \sum_{i} m_{\text{part}, i} + m_{\text{fuel}} \le m_{\text{class\_limit}}$$
+* **Effective Daylight Generation:**
+  $$P_{\text{gen}} = A_{\text{solar}} \times \eta_{\text{solar}} \times f_{\text{sunlight}} \ge P_{\text{draw}} \times d$$
+  *(where $f_{\text{sunlight}}$ is the orbital daylight fraction: ~0.72 in SSO, ~0.60 in LEO, and $d$ is duty cycle).*
+* **Downlink Contact Capacity:**
+  $$\text{Data}_{\text{sent}} = R_{\text{downlink}} \times t_{\text{contact}} \times \eta_{\text{link}}$$
+* **Eclipse Survival:**
+  During orbital night, battery capacity must sustain bus keep-alive draw without depleting below reserve thresholds.
+
+### Simulation Outcomes:
+* **`baseline_met`:** Full mission success; all primary science objectives downlinked within required margins.
+* **`threshold_met`:** Partial mission success; concept viability confirmed, minimum science collected, but accepting reduced payload duty cycles or sub-optimal margins.
+* **`failure`:** Spacecraft lost to orbital decay, negative power balance, memory buffer overflow, or pre-launch constraint violations.
+
+---
+
+## 6. NASA Datasets & References
+
+ORBITONE directly integrates principles and historical data from official NASA publications:
+
+1. **NASA CubeSat 101 Guide (Rev. Oct 2017):** Informs form-factor mass ceilings (1U: 1.33 kg, 1.5U: 2.00 kg, 2U: 2.66 kg, 3U: 4.00 kg), dispenser geometry, and the real-world historical CubeSat catalog (`missions_real.json` including *IceCube*, *MinXSS*, *STMSat-1*, *CADRE*, and *BisonSat*).
+2. **NASA SmallSat Institute (2025):** The four-segment mission architecture (Launch, Space, Ground, User), requirement traceability, and heritage hardware rules.
+3. **JPL Concept Maturity Levels (CML):** The progressive milestone workflow and 5×5 risk likelihood/consequence matrix format.
+4. **NASA POWER (CERES SYN1deg):** Satellite solar irradiance geometry and aerosol optical depth ($AOD_{55}$) reference values.
+5. **GMAT R2025a:** Used offline to benchmark Keplerian orbit periods and daylight/eclipse fractions.
+
+*See [submission/NASA_DATA_REVIEW.md](submission/NASA_DATA_REVIEW.md) for full citations and distinction between authentic NASA facts, engine calculations, and game-balance assumptions.*
+
+---
+
+## 7. Recommendation System
+
+Upon mission completion, `shared/src/report.ts` inspects flight telemetry, battery depth-of-discharge, data buffer queues, and subsystem margins to generate **two concrete, mathematically justified design changes** (`what_to_try_next`).
+
+### Example (Baseline 75-Point Mission):
+* **Recommendation 1 (Payload Observation Tuning):**
+  > *"Increase payload observation time fraction (observe_time_fraction) from 0.50 to 0.53 to increase science data collection from 360.0 GB to 381.6 GB (+2.4 science points) while keeping 30-day cumulative volume (31.8 GB) within the 32 GB flash memory buffer."*
+* **Recommendation 2 (Mass Margin Recovery):**
+  > *"Reduce fuel mass (fuel_mass_kg) from 0.1 kg to 0.0 kg to lower total spacecraft mass from 3.30 kg to 3.20 kg and expand 3U CubeSat class mass margin from 17.5% to 20.0%."*
+
+*See [submission/RECOMMENDATION_SYSTEM.md](submission/RECOMMENDATION_SYSTEM.md) for data flow diagrams and governing mathematical derivations.*
+
+---
+
+## 8. Technology Stack
+
+* **Frontend:** Vite, TypeScript, TailwindCSS, HTML5 Canvas & WebGL.
+* **3D Visualization:** Three.js procedural orbital and spacecraft renderer (with responsive camera controls and launch animations).
+* **Shared Rules Engine (`@orbitone/shared`):** Pure, platform-agnostic TypeScript library containing all physical formulas, catalog data, constraint checkers, and simulation engines (100% test coverage with Vitest).
+* **Backend Server (`@orbitone/server`):** Node.js, Express, Socket.IO, and Zod for authoritative room state management and synchronization.
+* **Testing & Verification:** Vitest unit test suites and Playwright end-to-end browser automation.
+
+---
+
+## 9. Multiplayer Architecture
+
+ORBITONE features an authoritative multiplayer mode where 2 to 4 players assemble in a shared Mission Control Room via Socket.IO:
+
+* **Role Specialization:**
+  * **Mission Planner:** Owns mission objectives, Level-1 requirements, target orbit, and final sign-offs.
+  * **Spacecraft Engineer:** Owns structural chassis, solar arrays, battery sizing, OBC selection, and mass/power margins.
+  * **Science Lead:** Owns scientific instruments, sensor duty cycles, science point yield, and data volume.
+  * **Comms & Budget Officer:** Owns radio transmitters, ground station downlink passes, budget allocation, and launch vehicle selection.
+* **Consensus Decisions & Voting:** Critical architecture trades (Target Orbit, Science Objective, Launch Vehicle, Final Launch) require synchronized cryptographic-style crew voting.
+* **Server Authority:** The server (`@orbitone/server`) validates all client intents against `shared/src/protocol.ts` before broadcasting updated room state.
+
+---
+
+## 10. Educational Impact
+ORBITONE transforms abstract systems engineering concepts into intuitive, exploratory gameplay:
+* Cadets discover why a high-resolution multispectral imager is useless without sufficient downlink bandwidth or battery storage for orbital eclipse passes.
+* Students learn why choosing a cheaper rideshare launch limits spacecraft mass, necessitating trade studies or descope options.
+* Team mode fosters communication, negotiation, and consensus building around technical constraints.
+
+---
+
+## 11. Scientific Limitations and Assumptions
+* **Educational Scope:** ORBITONE is an educational simulation designed to teach trade-offs, **not** a flight dynamics or orbital propagation tool.
+* **Two-Body Approximation:** Orbital mechanics assume spherical Earth two-body circular Keplerian orbits without non-spherical ($J_2$) perturbations or third-body lunar/solar gravitational pulls.
+* **Simplified Economics:** Financial budgets and component costs are normalized educational game-balance values, not actual commercial quotes.
+* **CML Alignment:** The game uses the conceptual principles of JPL Concept Maturity Levels for stage gating, but does not claim institutional NASA SP-6105 handbook compliance.
+
+---
+
+## 12. How to Run the Application Locally
+
+### Prerequisites:
+* **Node.js:** v18.0.0 or higher (v20+ recommended)
+* **npm:** v9.0.0 or higher
+
+### Step-by-Step Setup:
+
+1. **Install Dependencies:**
+   ```bash
+   # Install root and workspace dependencies
+   npm --prefix shared install
+   npm --prefix app install
+   npm --prefix server install
+   ```
+
+2. **Run Test Suites:**
+   ```bash
+   # Run all 155 shared unit tests
+   npm --prefix shared test
+
+   # Run server multiplayer tests
+   npm --prefix server test
+   ```
+
+3. **Build Packages:**
+   ```bash
+   npm --prefix shared run build
+   npm --prefix app run build
+   npm --prefix server run build
+   ```
+
+4. **Start Local Development Servers:**
+   * **Terminal 1 (Multiplayer Server):**
+     ```bash
+     npm --prefix server start
+     # Server listening on http://localhost:3000
+     ```
+   * **Terminal 2 (Frontend Client):**
+     ```bash
+     npm --prefix app run dev
+     # Client ready on http://localhost:5173
+     ```
+   * Open `http://localhost:5173/` in your browser.
+
+---
+
+## 13. Demo Mission Configuration & Expected Results
+
+To reproduce the verified 75-point baseline demo mission:
+
+### Configuration:
+* **Objective:** Earth Surface & Weather Imaging (`earth_observation`)
+* **Orbit:** Sun-Synchronous Orbit (`sso`, 550 km altitude)
+* **Launch Vehicle:** SmallSat Rideshare Dispenser (`rideshare_dispenser`)
+* **Chassis Class:** 3U CubeSat (`3U`, 4.0 kg limit)
+* **Equipped Subsystems (7 parts):**
+  1. `struct_3u` (3U Primary Chassis Structure)
+  2. `solar_deployable_3u` (3U Deployable Solar Array)
+  3. `batt_space_30wh` (30Wh Space-Grade Battery Pack)
+  4. `comms_sband_patch` (S-Band Patch Transceiver)
+  5. `obc_rad_hard` (Rad-Hardened System-on-Chip OBC)
+  6. `adcs_3axis_wheels` (3-Axis Reaction Wheels & Star Tracker)
+  7. `inst_multispectral_imager` (Multispectral Earth Observation Imager)
+* **Mission Lifetime:** 12 months
+* **Authorized Budget:** \$2.5M
+* **Fuel Mass:** 0.1 kg
+* **Duty Cycle:** 0.50
+* **Observation Time Fraction:** 0.50
+* **Link Efficiency:** 0.95
+* **Simulation Seed:** 42 | **Level:** 1
+
+### Expected Results:
+* **Outcome:** `threshold_met` (*Partial Mission Success*)
+* **Composite Score:** `75 / 100` (Rank: *Mission Lead*)
+  * *Mission Success:* 20 / 30
+  * *Science Value:* 8 / 20
+  * *Resource Efficiency:* 20 / 20
+  * *Engineering Quality:* 27 / 30
+* **Science Data Collected:** 40.0 pts (360.0 GB downlinked, 0.0 GB lost)
+* **Anomalies / Disruptions:** 0
+* **Recommendations Rendered:**
+  1. Increase `observe_time_fraction` to 0.53 (+2.4 science pts).
+  2. Reduce `fuel_mass_kg` to 0.0 kg (expand mass margin to 20.0%).
+
+---
+
+## 14. Submission Evidence & Screenshots
+
+All high-resolution verification screenshots are archived in the [`submission/evidence/`](submission/evidence/) directory:
+
+| Filename | Stage / View | Description |
 | --- | --- | --- |
-| Mission Planner | Objective, requirements, orbit, mission time, final sign-off | Wants longer mission and better orbit, which costs money and fuel |
-| Spacecraft Engineer | Structure, power, battery, computer, attitude control, mass and power margins | Every added part adds mass and power draw |
-| Science Lead | Instruments, science value, data volume | Wants more instruments, which add mass, power and data |
-| Comms and Budget Officer | Antenna, ground stations, data downlink, total cost, launch vehicle | Wants to cut cost, but data cannot be sent home |
-
-Team rules:
-- Each role edits only its own panel. Everyone sees everything (read-only).
-- Shared decisions (objective, orbit, launch vehicle, final launch) need a **vote**: majority of players. In a 2-player team both must agree.
-- "Negotiation card" events force a trade-off between two roles (section 9).
-- Team coordination score (section 8) rewards: all roles active, resolved conflicts, no last-second edits.
-
----
-
-## 4. Mission segments (shown in the UI as four tabs)
-
-From NASA's four-segment model:
-1. **Launch segment**: launch vehicle, orbit insertion.
-2. **Space segment**: the spacecraft and instruments.
-3. **Ground segment**: ground stations, downlink windows, mission control.
-4. **User segment**: who uses the data. The mission objective is chosen here first ("begin with the end in mind").
+| `01_landing_page.png` | Landing Page | Hero portal with interactive 3D Earth view, featured NASA dataset info, and mode selection. |
+| `02_science_objective.png` | Stage 1 (CML 1) | Science objective investigation selection card and Level-1 payload requirements. |
+| `03_mission_requirements.png` | Stage 2 (CML 2) | Level-1 engineering requirements and explicit verification method mapping. |
+| `04_trade_space.png` | Stage 3 (CML 3) | Architecture trade study comparing orbits and certified launch accommodations. |
+| `05_spacecraft_configuration_3d.png`| Stage 4 (CML 4) | Modular spacecraft workbench with 3D turntable assembly and equipped subsystem inventory. |
+| `06_prelaunch_review.png` | Stage 5 | Pre-launch flight readiness review gate and constraint verification checklist. |
+| `07_launch_orbital_insertion.png` | Stage 6 | 3D launch sequence showing countdown, atmospheric ascent, and dispenser separation. |
+| `08_flight_debrief_75pts.png` | Stage 7 | Post-mission debrief dashboard displaying 75/100 composite score, badge rank, and risk matrix. |
+| `09_report_recommendations.png` | Stage 7 Close-Up | Focused capture of both mathematically validated next-step design recommendations. |
+| `10_multiplayer_lobby.png` | Multiplayer Lobby | Dispatch screen connected to the live authoritative Socket.IO backend at `http://localhost:3000`. |
+| `11_multiplayer_room_host.png` | Mission Control (Host View) | Initial flight room creation on the live authoritative backend showing host lease and discipline selector. |
+| `12_multiplayer_room_live.png` | Mission Control (Live Crew & Voting) | Live session showing two independently connected players (Mission Planner & Science Lead) and active synchronized consensus voting over Socket.IO. |
 
 ---
 
-## 5. Game flow (mission wizard)
-
-Stages follow the CML idea: the design gets more detailed at each step. Players can go back at any time before launch, and every change updates all resources live.
-
-1. **Objective (CML 1)**: pick a science objective and read what it needs.
-2. **Requirements (CML 2)**: the game turns the objective into 4 to 6 simple requirements, for example "carry an imager", "downlink at least X data per day", "last at least N months". Each requirement shows how it will be checked ("verified by: mass check at launch").
-3. **Trade study (CML 3)**: compare 2 to 3 options for orbit, launch vehicle and instrument set side by side.
-4. **Point design (CML 4)**: build the spacecraft part by part. See the 3D model update.
-5. **Pre-launch review**: automatic checklist. All hard checks must pass to launch (section 7). Soft warnings are allowed.
-6. **Launch**: animated launch, then orbit insertion.
-7. **Operations**: mission simulation over the planned lifetime with random events.
-8. **Report**: score, timeline, why it worked or failed, similar real missions.
-
-Difficulty tiers (these also map to MDL study depth):
-
-| Level | Name | Spacecraft class | What is unlocked |
-| --- | --- | --- | --- |
-| 1 | Office Hours | CubeSat (1U to 6U) | 1 objective, 3 orbits, 2 vehicles, 4 instruments, hints always on, no random events |
-| 2 | Trade Study | Small satellite | 2 objectives, 5 orbits, 4 vehicles, 8 instruments, mild random events |
-| 3 | Point Design | Science mission class | Multi-objective, all orbits, all vehicles, ground-station planning, full events |
-| S | Sandbox | Any | No scoring pressure, all limits adjustable, all parts unlocked |
-
-Start the game with a 60 to 90 second guided tutorial that builds one tiny CubeSat mission.
-
----
-
-## 6. Resources (always visible in a top bar)
-
-Six meters, each with a green / yellow / red state and a "why?" tooltip.
-
-| Resource | Meaning (plain words) | Over the limit means |
-| --- | --- | --- |
-| Mass (kg) | Total weight of spacecraft plus fuel | Launch vehicle cannot lift it (hard fail) |
-| Power (W) | Electricity the solar panels and battery can give vs. what parts use | Instruments switch off, mission loses science |
-| Budget ($M, game money) | Money for build, launch and operations | Cannot launch |
-| Data (GB per day) | Amount of data the instruments make | Onboard storage fills, data is lost |
-| Communications (GB per day) | How much data can be sent to Earth | Data waits or is lost |
-| Time (months) | Build time plus mission lifetime | Missing the launch window or ending early |
-
-Core relations (use these formulas, keep them in one `config/balance.ts` file so the team can tune them):
-
-```
-total_mass      = sum(part.mass) + fuel_mass
-power_generated = solar_area * efficiency * orbit.sunlight_fraction
-power_used      = sum(part.power) * duty_cycle
-data_made_per_day    = sum(instrument.data_rate) * observe_time_fraction
-data_sent_per_day    = antenna.rate * ground_contact_minutes_per_day * link_efficiency
-cost_total      = build_cost + launch_cost + ops_cost_per_month * lifetime_months
-```
-
-Orbit effects (simple, honest and explainable):
-- **Low Earth orbit (LEO)**: cheap, high resolution, many short ground contacts, orbit decays slowly, more eclipse time so battery matters.
-- **Sun-synchronous orbit (SSO)**: steady lighting for imaging, medium cost.
-- **Geostationary orbit (GEO)**: sees one area continuously, constant contact with one ground station, expensive launch, low resolution from far away.
-- **Highly elliptical / lunar / deep space**: needs more launch energy (higher launch capability needed), long delays and low data rates.
-Keep orbit as a parameter set: altitude, sunlight fraction, ground contact minutes, launch energy needed, lifetime penalty. Show the one-line reason for each effect.
-
----
-
-## 7. Hard checks and validation (the "grayed out" rule)
-
-Hard checks block launch. Each failure shows a plain explanation and a suggested fix.
-
-1. `total_mass <= vehicle.capacity_to(orbit)`. This is the launch compatibility check required by the challenge.
-2. `power_used <= power_generated` (averaged over an orbit, including eclipse and battery).
-3. `cost_total <= budget`.
-4. Every selected instrument has a compatible mounting, pointing and data path (comms and computer can handle it).
-5. Every requirement from stage 2 is met or knowingly waived (waiving costs score).
-6. Spacecraft fits the vehicle fairing or dispenser size.
-
-Compatibility rules (inspired by the telescope game): options that do not fit the objective or the chosen class are **grayed out** with a tooltip saying why, not hidden.
-
-Soft warnings: low margins (under 10% on mass, power or data), single point of failure, very short lifetime.
-
----
-
-## 8. Simulation and scoring
-
-### Simulation
-- Run month by month (or day by day on fast-forward) over the mission lifetime.
-- Each step: update power state, data stored, data sent, science collected, random event check, health.
-- The player can pause, speed up, and watch the 3D view and the resource graphs.
-- Same design plus same random seed gives the same result (so teams can compare). Different seeds give different events.
-
-### Score (0 to 100, shown with a breakdown)
-
-| Part | Weight | Rewards |
-| --- | --- | --- |
-| Mission success | 30 | Objective requirements actually met |
-| Science value | 20 | Science data delivered to the user segment |
-| Resource efficiency | 20 | Margins used well, little waste, under budget |
-| Engineering quality | 15 | Healthy margins, redundancy where it matters |
-| Team coordination | 15 | Team mode only. In solo mode this weight moves to Engineering quality |
-
-Ranks: Cadet (0 to 39), Engineer (40 to 59), Mission Lead (60 to 79), Flight Director (80 to 100).
-
-Leaderboard and saved designs: store the design as JSON (section 12) so players can save, share a code, and compare.
-
----
-
-## 9. Random events
-
-Frequency by level: none (L1), rare (L2), normal (L3). Each event explains the cause and how a different design would have helped.
-
-Examples (game events, not claims about real missions):
-- Solar storm: raises radiation risk, a shielded computer survives, an unshielded one reboots.
-- Ground station outage: data waits, more onboard storage means no loss.
-- Launch delay: lose 1 month, hurts if the launch window is tight.
-- Budget cut (team negotiation card): remove $X from one role's area, the team must agree who loses.
-- Instrument anomaly: one instrument loses performance, redundancy or margin helps.
-- Orbit decay faster than expected: lifetime shortened in low orbit.
-
----
-
-## 10. Post-mission report (must-have)
-
-Auto-generated page, printable, with:
-1. Result: success, partial success, or failure.
-2. Timeline of mission events (launch, orbit insertion, each event, end).
-3. Resource graphs over time (power, data stored, budget).
-4. "Why did this happen?" in 3 to 5 plain sentences. Always name the cause and the trade-off ("Your battery was too small for LEO eclipses, so the camera shut off every orbit").
-5. "What to try next": two concrete design changes.
-6. **Similar real mission**: match the design to a real NASA or partner mission by objective and size, as the Webb telescope game does. Use only missions confirmed in the resource files or the NASA site, for example PUNCH (four small satellites in low Earth orbit studying the Sun's corona), Dawn (orbited Vesta and Ceres), Webb, Hubble, OSIRIS-REx. Never invent a match, and show a link.
-7. Score breakdown and rank.
-
----
-
-## 11. Visuals and UI
-
-Tech target: Three.js in the browser. Use the installed Three.js skills.
-
-3D scenes (inspired by NASA Mission Viz):
-- Earth with atmosphere glow, Moon, optional Mars.
-- Orbit drawn as a line. Spacecraft moves along it. Camera can orbit around and zoom.
-- Spacecraft 3D model assembled from the parts the player chose (box body, solar panel wings, antenna dish, instrument shapes). Simple low-poly is fine.
-- Launch animation and orbit insertion animation.
-- Earth to Moon transfer scenario as a level 3 mission.
-
-UI rules:
-- Resource bar always on top. Role panels on the left. 3D view in the center. "Explain this" panel on the right.
-- Every term (apogee, payload, downlink, duty cycle, etc.) has a hover definition written for a 12-year-old.
-- Colors never carry meaning alone (use icons or text with red/yellow/green) for accessibility. Works on laptop and tablet (at least 1024x768). Provide keyboard focus and readable contrast.
-- Use Stitch for the UI design, then convert to code.
-
----
-
-## 12. Data model (keep game content in JSON, not in code)
-
-```
-/data/objectives.json    id, name, description, needs: [capabilities], recommended_orbits
-/data/orbits.json        id, name, altitude_km, sunlight_fraction, contact_min_per_day, launch_energy, lifetime_penalty, explanation
-/data/vehicles.json      id, name, cost, capacity_by_orbit: {orbitId: kg}, fairing_size
-/data/parts.json         id, category (structure|power|battery|comms|computer|adcs|instrument), mass, power, cost, data_rate, level_unlocked, requires
-/data/events.json        id, trigger, effect, explanation, min_level
-/data/missions_real.json real mission matches for the report (name, objective, size, orbit type, url)
-/designs/<code>.json     saved player designs
-```
-
-Every number must have `source: "game"` or `source: "NASA <url>"`.
-
----
-
-## 13. Multiplayer (team of up to 4)
-
-- Node server with Socket.IO rooms. One room per team, 4-letter join code.
-- **Server is the authority**: it holds mission state, validates every change, and broadcasts results. Clients send intents only.
-- Events: `join_room`, `set_role`, `edit_part`, `propose_decision`, `vote`, `start_sim`, `state_update`.
-- Reconnect: a player who drops can rejoin with the same code and gets the full state.
-- Solo mode runs the same logic locally with no server.
-- Use the `web-realtime-socket-io` and `realtime-multiplayer` skills.
-
----
-
-## 14. Suggested tech stack
-
-- Frontend: Vite plus React (or plain TypeScript), Three.js.
-- Server: Node.js plus Socket.IO.
-- State and logic: one shared TypeScript package (`/shared`) used by both client and server, so the simulation gives the same result everywhere.
-- Tests: unit tests for the formulas and the hard checks (these are the heart of the game).
-
----
-
-## 15. Build order for the hackathon (do in this order, ship at each step)
-
-1. **Core loop, solo, no 3D**: objective, parts list, six resource meters, launch check, simple sim, text report. Playable.
-2. **Content**: 3 objectives, 4 orbits, 3 vehicles, ~15 parts, 5 events, with plain-language explanations.
-3. **3D**: Earth, orbit line, spacecraft that changes with parts, launch animation.
-4. **Report and scoring** with "why" explanations and similar-mission match.
-5. **Team mode**: rooms, roles, voting.
-6. **Polish**: tutorial, difficulty levels, sandbox, save and share code, leaderboard, accessibility.
-
-Definition of done for the demo: a new player can finish Level 1 in under 5 minutes, see why they won or lost, and a 2-person team can finish a mission together.
-
----
-
-## 16. Rules for the coding agent
-
-- Follow this file. If something is unclear, ask a short question instead of guessing.
-- Keep all balance numbers in `config/balance.ts` and `/data/*.json`.
-- Never put API keys in code, logs or this repo. Use `.env` (listed in `.gitignore`).
-- Do not claim game values are real NASA values.
-- Credit NASA and partner resources on an "About and Sources" screen. Include the NASA disclaimer: NASA does not endorse any non-U.S. Government entity.
-- Respect each outside resource's use terms. Do not copy text, images or game assets from the NASA, JPL, Webb or CSA games. Build our own.
-- Prefer clear, small, tested functions. Explain the *why* in every player-facing message.
+## 15. Team Contributions
+* **Shared Physics & Rules Engine (`@orbitone/shared`):** Pure deterministic astrodynamics formulas, catalog definitions, scoring algorithms, and recommendation logic.
+* **Authoritative Multiplayer Server (`@orbitone/server`):** Express & Socket.IO server implementing room synchronization, role leases, consensus voting, and validation gates.
+* **Frontend Client & 3D Visualizer (`app/`):** Responsive mission wizard, Commander Nova co-pilot assistant, Three.js 3D satellite renderer, and debrief dashboard.

@@ -189,36 +189,10 @@ export class MissionWizard {
     this.classes = getCubesatClasses();
     this.parts = getParts();
 
-    // Default Level 1 initial design (aligned with Person A baseline validation fixture)
-    const defaultObjective = this.objectives.find((o) => o.id === 'earth_observation')?.id ?? this.objectives[0]?.id ?? 'earth_observation';
-    const defaultOrbit = this.orbits.find((o) => o.id === 'sso')?.id ?? this.orbits[0]?.id ?? 'sso';
-    const defaultVehicle = this.vehicles.find((v) => v.id === 'rideshare_dispenser')?.id ?? this.vehicles[0]?.id ?? 'rideshare_dispenser';
-    const defaultClass = this.classes.find((c) => c.id === '3U')?.id ?? this.classes[0]?.id ?? '3U'; // 3U standard
-
     this.state = {
       currentStage: 1,
       maxStageReached: 1,
-      design: {
-        objective_id: defaultObjective,
-        orbit_id: defaultOrbit,
-        vehicle_id: defaultVehicle,
-        cubesat_class_id: defaultClass,
-        part_ids: [
-          'struct_3u',
-          'solar_deployable_3u',
-          'batt_space_30wh',
-          'comms_sband_patch',
-          'obc_rad_hard',
-          'adcs_3axis_wheels',
-          'inst_multispectral_imager'
-        ],
-        lifetime_months: 12,
-        budget_m: 2.5,
-        fuel_mass_kg: 0.1,
-        duty_cycle: 0.5,
-        observe_time_fraction: 0.5,
-        link_efficiency: 0.95
-      },
+      design: this.getDefaultDesign(),
       simResult: null,
       score: null,
       report: null
@@ -226,6 +200,35 @@ export class MissionWizard {
 
     this.attachEventListeners();
     this.syncSceneWithDesign();
+  }
+
+  private getDefaultDesign(): MissionDesign {
+    const defaultObjective = this.objectives.find((o) => o.id === 'earth_observation')?.id ?? this.objectives[0]?.id ?? 'earth_observation';
+    const defaultOrbit = this.orbits.find((o) => o.id === 'sso')?.id ?? this.orbits[0]?.id ?? 'sso';
+    const defaultVehicle = this.vehicles.find((v) => v.id === 'rideshare_dispenser')?.id ?? this.vehicles[0]?.id ?? 'rideshare_dispenser';
+    const defaultClass = this.classes.find((c) => c.id === '3U')?.id ?? this.classes[0]?.id ?? '3U'; // 3U standard
+
+    return {
+      objective_id: defaultObjective,
+      orbit_id: defaultOrbit,
+      vehicle_id: defaultVehicle,
+      cubesat_class_id: defaultClass,
+      part_ids: [
+        'struct_3u',
+        'solar_deployable_3u',
+        'batt_space_30wh',
+        'comms_sband_patch',
+        'obc_rad_hard',
+        'adcs_3axis_wheels',
+        'inst_multispectral_imager'
+      ],
+      lifetime_months: 12,
+      budget_m: 2.5,
+      fuel_mass_kg: 0.1,
+      duty_cycle: 0.5,
+      observe_time_fraction: 0.5,
+      link_efficiency: 0.95
+    };
   }
 
   public onExit(fn: () => void): void {
@@ -442,12 +445,21 @@ export class MissionWizard {
   }
 
   public restart(): void {
+    if (this.flightTimer) {
+      clearInterval(this.flightTimer);
+      this.flightTimer = null;
+    }
+    this.isSimulating = false;
+    this.flightStepIndex = 0;
+    this.flightLogs = [];
+    this.activeSelection = null;
+    this.state.design = this.getDefaultDesign();
     this.state.simResult = null;
     this.state.score = null;
     this.state.report = null;
-    this.isSimulating = false;
-    this.flightStepIndex = 0;
+    this.state.maxStageReached = 1;
     this.scene.setSimState({ mode: 'orbit', progress: 0 });
+    this.syncSceneWithDesign();
     this.setStage(1);
   }
 
@@ -769,6 +781,7 @@ export class MissionWizard {
           case 'view-report':
             this.finishLaunchSimulation();
             break;
+          case 'restart-wizard':
           case 'restart-mission':
             this.restart();
             break;
