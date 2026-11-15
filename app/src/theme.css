@@ -4,7 +4,7 @@
  * Chunky rounded buttons, glass-like telemetry cards, star rank, and glowing mission path.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,500;0,6..12,600;1,6..12,400&family=Quicksand:wght@500;600&display=swap');
 
 :root {
   /* ========================================================================
@@ -142,11 +142,132 @@
   --space-2xl: 48px;
 
   /* ========================================================================
-     Typography (Plus Jakarta Sans + Space Grotesk with System Fallbacks)
+     Typography System (P2: Fredoka + Nunito Sans + Quicksand + Monospace)
      ======================================================================== */
-  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-headline: 'Fredoka', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'Nunito Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-label: 'Quicksand', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Aliases for backwards compatibility */
+  --font-family: var(--font-body);
+  --font-display: var(--font-headline);
+  --font-heading: var(--font-headline);
+  --mono: var(--font-mono);
+}
+
+/* ==========================================================================
+   Typography Rules & Element Styling
+   ========================================================================== */
+
+/* Headlines: Fredoka 600 and 700 */
+h1, h2, h3, h4, h5, h6,
+.font-headline,
+.font-headline-xl,
+.font-headline-lg,
+.font-headline-md,
+.font-headline-sm {
+  font-family: var(--font-headline);
+  letter-spacing: 0.01em;
+}
+
+h1, .font-headline-xl, .font-headline-lg {
+  font-weight: 700;
+}
+
+h2, h3, h4, h5, h6, .font-headline-md, .font-headline-sm {
+  font-weight: 600;
+}
+
+/* Body: Nunito Sans 400, 500, 600 */
+body, p, li,
+.font-body,
+.font-body-lg,
+.font-body-md,
+.font-body-sm {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+p strong, li strong, .font-body strong {
+  font-weight: 600;
+}
+
+.font-body-lg {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.font-body-md {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.font-body-sm {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Labels, Pills, Badges, Tabs & Buttons: Quicksand 500 and 600 */
+label,
+.font-label,
+.font-label-lg,
+.font-label-md,
+.font-label-sm,
+button,
+.button,
+.btn,
+.btn-chunky,
+.btn-primary,
+.btn-secondary,
+.btn-quiet,
+.badge,
+.pill,
+.stage-pill,
+.tab,
+.need-pill,
+.summary-label,
+.req-badge,
+.check-badge,
+.copilot-badge,
+.copilot-status-title,
+.column-count,
+.mission-path-label,
+.topbar-badge,
+.mock-badge,
+.live-badge,
+.role-badge,
+.decision-card-title,
+.category-filter-btn {
+  font-family: var(--font-label);
+  font-weight: 600;
+}
+
+.font-label-sm {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.font-label-md {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Telemetry, Numbers, Engineering Readouts: Monospace with Tabular Figures */
+code, pre, kbd, samp,
+.mono,
+.font-mono,
+.meter-value,
+.meter-limit,
+.telemetry-val,
+.stat-value,
+.readout-value,
+.score-big,
+.score-breakdown-list strong {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
@@ -179,8 +300,8 @@ select:focus-visible,
 
 .button,
 .btn-chunky {
-  font-family: var(--font-family);
-  font-weight: 800;
+  font-family: var(--font-label, 'Quicksand', sans-serif);
+  font-weight: 600;
   font-size: 13px;
   letter-spacing: 0.5px;
   padding: 12px 24px;
@@ -202,8 +323,8 @@ select:focus-visible,
 .btn-primary {
   background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
   color: #040914 !important;
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-label);
+  font-weight: 600;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
   letter-spacing: 0.05em;
@@ -229,7 +350,7 @@ select:focus-visible,
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(56, 189, 248, 0.25);
   color: #dae2f8;
-  font-family: var(--font-display);
+  font-family: var(--font-label);
   font-weight: 600;
   border-radius: 9999px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -328,6 +449,44 @@ select:focus-visible,
   background: var(--bg-card-selected);
   border-color: var(--brand-cyan);
   box-shadow: 0 0 20px var(--brand-cyan-glow), var(--shadow-card);
+}
+
+.scene-card {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.turntable-scene-card {
+  min-height: 380px;
+  height: 380px;
+}
+
+@media (max-width: 640px) {
+  .turntable-scene-card {
+    min-height: 300px;
+    height: 300px;
+  }
+}
+
+.launch-scene-card {
+  min-height: 380px;
+  height: 380px;
+}
+
+.scene-host,
+[data-scene] {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  display: block;
+}
+
+.scene-host canvas,
+[data-scene] canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
 /* ==========================================================================
@@ -530,6 +689,162 @@ select:focus-visible,
 .chunky-progress-fill.fill-coral {
   background: linear-gradient(90deg, #ff7a7a, var(--brand-coral));
   box-shadow: 0 0 12px var(--brand-coral-glow);
+}
+
+/* ==========================================================================
+   Audio Toggle Button Controls (P3)
+   ========================================================================== */
+
+.audio-toggle-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill, 9999px);
+  border: 1px solid var(--glass-border);
+  background: var(--stitch-surface-container, #17202f);
+  color: var(--stitch-on-surface-variant, #d8c3ad);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.audio-toggle-btn:hover {
+  background: var(--stitch-surface-high, #222a3a);
+  transform: translateY(-1px);
+}
+
+.audio-toggle-btn:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+.audio-toggle-btn:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 2px;
+}
+
+.audio-toggle-btn.is-audio-active {
+  border-color: rgba(123, 208, 255, 0.35);
+  background: var(--stitch-surface-high, #222a3a);
+  color: var(--stitch-secondary, #7bd0ff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(123, 208, 255, 0.15);
+}
+
+.audio-toggle-btn.is-audio-muted {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--stitch-on-surface-variant, #8c9ba5);
+  opacity: 0.75;
+}
+
+.audio-toggle-btn.is-audio-muted:hover {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Orbital Loading System (P4)
+   ========================================================================== */
+
+@keyframes orbital-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.orbital-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 50%;
+  border: 2px solid rgba(123, 208, 255, 0.2);
+  border-top-color: var(--stitch-secondary, #7bd0ff);
+  animation: orbital-spin 0.85s linear infinite;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.orbital-spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.orbital-spinner-md {
+  width: 24px;
+  height: 24px;
+  border-width: 2.5px;
+}
+
+.orbital-spinner-lg {
+  width: 36px;
+  height: 36px;
+  border-width: 3px;
+}
+
+.loading-card {
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--stitch-surface-container, #17202f);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.loading-card-title {
+  font-family: var(--font-headline);
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.loading-card-subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--stitch-on-surface-variant, #d8c3ad);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.loading-nova-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 193, 116, 0.12);
+  border: 1px solid rgba(255, 193, 116, 0.3);
+  font-family: var(--font-label);
+  font-size: 11px;
+  color: var(--brand-yellow);
+}
+
+.inline-loading-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(123, 208, 255, 0.12);
+  border: 1px solid rgba(123, 208, 255, 0.25);
+  font-family: var(--font-label);
+  font-size: 11px;
+  color: var(--stitch-secondary, #7bd0ff);
+}
+
+.btn-loading {
+  opacity: 0.85;
+  cursor: wait !important;
+  pointer-events: none;
 }
 
 /* ==========================================================================

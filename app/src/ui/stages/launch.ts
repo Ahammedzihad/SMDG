@@ -120,8 +120,8 @@ export function renderLaunchStage(
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
           <!-- Left: 3D Flight Tracker -->
           <div class="lg:col-span-8 flex flex-col gap-space-sm">
-            <div class="launch-scene-card scene-card relative w-full h-[360px] lg:h-[420px] rounded-2xl overflow-hidden bg-surface-container-lowest shadow-2xl flex items-center justify-center">
-              <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+            <div class="launch-scene-card scene-card relative w-full rounded-2xl overflow-hidden bg-surface-container-lowest shadow-2xl flex items-center justify-center" style="min-height: 380px; height: 380px;">
+              <div class="scene-host" data-scene style="width:100%; height:100%; min-height: 380px;"></div>
 
               <!-- Reticle HUD Graphics -->
               <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -251,8 +251,8 @@ export function renderLaunchStage(
       </div>
 
       <!-- 3D Launch Preview Stage -->
-      <div class="launch-scene-card scene-card relative w-full h-[280px] lg:h-[320px] rounded-2xl overflow-hidden bg-surface-container-lowest shadow-2xl flex items-center justify-center">
-        <div class="scene-host" data-scene style="width:100%; height:100%"></div>
+      <div class="launch-scene-card scene-card relative w-full rounded-2xl overflow-hidden bg-surface-container-lowest shadow-2xl flex items-center justify-center" style="min-height: 380px; height: 380px;">
+        <div class="scene-host" data-scene style="width:100%; height:100%; min-height: 380px;"></div>
         <div class="absolute top-3 left-3 flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-container-lowest/80 backdrop-blur-md shadow-md">
           <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
           <span class="font-label-sm text-label-sm text-on-surface uppercase tracking-wider">LAUNCH PAD PREPARATION // DEMO COMPLEX</span>

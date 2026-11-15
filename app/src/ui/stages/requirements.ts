@@ -143,8 +143,7 @@ export function renderRequirementsStage(
         <span class="stage-pill">STAGE 2 OF 7 // REQUIREMENTS DEFINITION</span>
         <h2 id="stage-heading">Initial Feasibility (CML 2)</h2>
         <p>
-          Every science objective translates into hard engineering requirements.
-          In real NASA spaceflight, <strong>every requirement must specify how it will be verified</strong> before the rocket leaves the launchpad.
+          Measurable engineering specifications and verification criteria for mission success.
         </p>
       </div>
 

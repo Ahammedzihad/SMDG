@@ -14,6 +14,9 @@ import { LobbyView } from './ui/lobby/lobbyView';
 import { primaryButton, secondaryButton } from './ui/components';
 import { renderIcon } from './ui/icons';
 import { renderHowToPlayModal } from './ui/howToPlay';
+import { renderInventoryModal } from './ui/inventoryModal';
+import { creditsManager, COSMETIC_CATALOG, ACHIEVEMENTS } from './credits/creditsManager';
+import { audioManager } from './audio/audioManager';
 
 type MissionConfig = typeof INITIAL_CONFIG;
 type Player = { id: string; name: string; role: string; connected: boolean; suit: string };
@@ -84,6 +87,10 @@ let customName = name;
 let menuPage: 'main' | 'play' | 'customize' | 'settings' = 'main';
 let showProvenanceModal = false;
 let isHowToPlayOpen = false;
+let isInventoryOpen = false;
+let selectedInventoryId: string | undefined = undefined;
+let activeInventoryTab: 'instruments' | 'missions' | 'tech' = 'instruments';
+let isPendingRoomOperation: 'create' | 'join' | null = null;
 
 // Simulation State
 let simStageIndex = 0;
@@ -190,16 +197,20 @@ function ensureConnection(): Promise<boolean> {
 }
 
 async function createRoom() {
+  if (isPendingRoomOperation) return;
   savedName();
+  isPendingRoomOperation = 'create';
   notice = 'Connecting to mission server…';
   render();
   const connected = await ensureConnection();
   if (!connected) {
+    isPendingRoomOperation = null;
     notice = 'Multiplayer server is offline. Starting in Local Solo Mode.';
     startOffline();
     return;
   }
   socket.emit('room:create', { name, suit }, (response: any) => {
+    isPendingRoomOperation = null;
     if (!response?.ok) {
       notice = response?.error || 'Could not create a room.';
       render();
@@ -217,6 +228,7 @@ async function createRoom() {
 }
 
 async function joinRoom() {
+  if (isPendingRoomOperation) return;
   savedName('#join-name');
   const input = document.querySelector<HTMLInputElement>('#room-code');
   const code = (input?.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
@@ -225,15 +237,18 @@ async function joinRoom() {
     render();
     return;
   }
+  isPendingRoomOperation = 'join';
   notice = 'Connecting to mission server…';
   render();
   const connected = await ensureConnection();
   if (!connected) {
+    isPendingRoomOperation = null;
     notice = 'Multiplayer server is unreachable. You can still play in Local Solo Mode.';
     render();
     return;
   }
   socket.emit('room:join', { code, name, suit }, (response: any) => {
+    isPendingRoomOperation = null;
     if (!response?.ok) {
       notice = response?.error || 'Could not join that room.';
       render();
@@ -386,12 +401,26 @@ function shell(content: string) {
         <span class="topbar-status"><i class="status-light ${serverConnected ? 'is-online' : ''}"></i>${serverConnected ? 'SERVER READY' : 'LOCAL MODE AVAILABLE'}</span>
       </div>
       <div class="topbar-right" style="display:flex; align-items:center; gap:8px;">
-        <button class="button button-quiet" data-action="open-how-to-play" style="padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
+        <button class="audio-toggle-btn ${audioManager.isSfxEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-action="toggle-audio" style="min-width:44px; min-height:44px;" title="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}" aria-label="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}">
+          <span class="material-symbols-outlined text-[18px]">${audioManager.isSfxEnabled() ? 'volume_up' : 'volume_off'}</span>
+        </button>
+        <button class="audio-toggle-btn ${audioManager.isMusicEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-action="toggle-music" style="min-width:44px; min-height:44px;" title="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}" aria-label="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}">
+          <span class="material-symbols-outlined text-[18px]">${audioManager.isMusicEnabled() ? 'music_note' : 'music_off'}</span>
+        </button>
+        <button class="button button-quiet" data-action="open-how-to-play" style="min-height:44px; padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
           <span class="material-symbols-outlined text-[15px] text-secondary">help</span>
           <span>HOW TO PLAY</span>
         </button>
-        <button class="button button-quiet" data-action="toggle-provenance" style="padding:6px 10px; font-size:9px;">NASA DATA INFO</button>
-        <span class="avatar-chip" style="border-color:${suitChoices.find((s) => s.id === suit)?.color || '#77e1e6'}">${userInitial}</span>
+        <button class="button button-quiet" data-action="toggle-provenance" style="min-height:44px; padding:6px 10px; font-size:9px;">NASA DATA INFO</button>
+        <button class="button button-quiet" data-action="open-inventory" style="min-height:44px; padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
+          <span class="material-symbols-outlined text-[15px] text-tertiary">biotech</span>
+          <span>SCIENCE</span>
+        </button>
+        <div class="credits-pill" title="Orbit Credits" style="min-height:36px;">
+          <span class="material-symbols-outlined text-[16px]">stars</span>
+          <span>${creditsManager.getCredits()}</span>
+        </div>
+        <span class="avatar-chip cursor-pointer" data-action="menu-customize" title="Cadet Profile / Customization" style="border-color:${suitChoices.find((s) => s.id === suit)?.color || '#77e1e6'}">${userInitial}</span>
       </div>
     </header>
     ${notice ? `<div class="notice-bar" role="status">${html(notice)}<button data-action="dismiss-notice" aria-label="Dismiss">×</button></div>` : ''}
@@ -402,6 +431,7 @@ function shell(content: string) {
     </footer>
     ${showProvenanceModal ? renderProvenanceModal() : ''}
     ${isHowToPlayOpen ? renderHowToPlayModal() : ''}
+    ${isInventoryOpen ? renderInventoryModal(selectedInventoryId, activeInventoryTab) : ''}
   </div>`;
 }
 
@@ -498,18 +528,28 @@ function renderPlayMenu() {
         <h2>Host a private room</h2>
         <p>Generate a unique 5-character mission code. Begin alone or invite your crew to join before starting.</p>
         <label class="field-label" for="player-name">YOUR CALLSIGN</label>
-        <input id="player-name" maxlength="18" placeholder="Flight Director" value="${html(name)}" autocomplete="nickname" />
-        <div style="margin-top:12px">${primaryButton('CREATE PRIVATE ROOM', 'create-room', 'rocket')}</div>
+        <input id="player-name" maxlength="18" placeholder="Flight Director" value="${html(name)}" autocomplete="nickname" ${isPendingRoomOperation ? 'disabled' : ''} />
+        <div style="margin-top:12px">
+          ${primaryButton('CREATE PRIVATE ROOM', 'create-room', 'rocket', {
+            loading: isPendingRoomOperation === 'create',
+            loadingText: 'ESTABLISHING ROOM…'
+          })}
+        </div>
       </section>
       <section class="play-choice panel glass-card">
         <span class="panel-index">OPTION 02 / JOIN PRIVATE ROOM</span>
         <h2>Enter existing room</h2>
         <p>Join a session hosted by another crew member using their private 5-character room code.</p>
         <label class="field-label" for="join-name">YOUR CALLSIGN</label>
-        <input id="join-name" maxlength="18" placeholder="Crew Member" value="${html(name)}" autocomplete="nickname" />
+        <input id="join-name" maxlength="18" placeholder="Crew Member" value="${html(name)}" autocomplete="nickname" ${isPendingRoomOperation ? 'disabled' : ''} />
         <label class="field-label" for="room-code">ROOM CODE</label>
-        <input id="room-code" maxlength="5" placeholder="ABCDE" autocomplete="off" />
-        <div style="margin-top:12px">${secondaryButton('JOIN PRIVATE ROOM', 'join-room', 'planet')}</div>
+        <input id="room-code" maxlength="5" placeholder="ABCDE" autocomplete="off" ${isPendingRoomOperation ? 'disabled' : ''} />
+        <div style="margin-top:12px">
+          ${secondaryButton('JOIN PRIVATE ROOM', 'join-room', 'planet', {
+            loading: isPendingRoomOperation === 'join',
+            loadingText: 'JOINING ROOM…'
+          })}
+        </div>
       </section>
       <div class="play-offline-card glass-card">
         <div>
@@ -527,37 +567,126 @@ function renderPlayMenu() {
 }
 
 function renderCustomizeMenu() {
-  const swatches = suitChoices
-    .map(
-      (choice) =>
-        `<button class="suit-choice ${suit === choice.id ? 'is-selected' : ''}" data-suit="${choice.id}" aria-pressed="${suit === choice.id}">
-          <i style="--suit:${choice.color}"></i>
-          <span>${choice.label}</span>
-        </button>`
-    )
+  const cust = creditsManager.getCustomization();
+  const currentCredits = creditsManager.getCredits();
+
+  // Suit Swatches
+  const suits = COSMETIC_CATALOG.filter((c) => c.type === 'suit');
+  const swatches = suits
+    .map((choice) => {
+      const isUnlocked = creditsManager.isUnlocked(choice.id);
+      const isSelected = suit === choice.id;
+      return `<button class="suit-choice ${isSelected ? 'is-selected' : ''}" data-suit="${choice.id}" aria-pressed="${isSelected}">
+        <i style="--suit:${choice.accentColor || '#77e1e6'}"></i>
+        <span>${choice.name}</span>
+        ${!isUnlocked ? `<span class="badge-lock" style="font-size:10px; color:#ffd166; margin-left:4px;">★ ${choice.cost}</span>` : ''}
+      </button>`;
+    })
     .join('');
-  const activeColor = suitChoices.find((c) => c.id === suit)?.color || '#77e1e6';
+
+  // Helmets
+  const helmets = COSMETIC_CATALOG.filter((c) => c.type === 'helmet');
+  const helmetOptions = helmets
+    .map((h) => {
+      const isUnlocked = creditsManager.isUnlocked(h.id);
+      const isSelected = cust.helmetId === h.id;
+      return `<button class="suit-choice ${isSelected ? 'is-selected' : ''}" data-item-id="${h.id}" aria-pressed="${isSelected}">
+        <span class="material-symbols-outlined text-[16px]">${h.icon}</span>
+        <span>${h.name}</span>
+        ${!isUnlocked ? `<span class="badge-lock" style="font-size:10px; color:#ffd166; margin-left:4px;">★ ${h.cost}</span>` : ''}
+      </button>`;
+    })
+    .join('');
+
+  // Accessories
+  const accessories = COSMETIC_CATALOG.filter((c) => c.type === 'accessory');
+  const accessoryOptions = accessories
+    .map((acc) => {
+      const isUnlocked = creditsManager.isUnlocked(acc.id);
+      const isSelected = cust.accessoryId === acc.id;
+      return `<button class="suit-choice ${isSelected ? 'is-selected' : ''}" data-item-id="${acc.id}" aria-pressed="${isSelected}">
+        <span class="material-symbols-outlined text-[16px]">${acc.icon}</span>
+        <span>${acc.name}</span>
+        ${!isUnlocked ? `<span class="badge-lock" style="font-size:10px; color:#ffd166; margin-left:4px;">★ ${acc.cost}</span>` : ''}
+      </button>`;
+    })
+    .join('');
+
+  // Badges
+  const badges = COSMETIC_CATALOG.filter((c) => c.type === 'badge');
+  const badgeOptions = badges
+    .map((b) => {
+      const isUnlocked = creditsManager.isUnlocked(b.id);
+      const isSelected = cust.badgeId === b.id;
+      return `<button class="suit-choice ${isSelected ? 'is-selected' : ''}" data-item-id="${b.id}" aria-pressed="${isSelected}">
+        <span class="material-symbols-outlined text-[16px]">${b.icon}</span>
+        <span>${b.name}</span>
+        ${!isUnlocked ? `<span class="badge-lock" style="font-size:10px; color:#ffd166; margin-left:4px;">★ ${b.cost}</span>` : ''}
+      </button>`;
+    })
+    .join('');
+
+  // Achievements Progress
+  const achievementsHtml = ACHIEVEMENTS.map((a) => {
+    const unlocked = creditsManager.isAchievementUnlocked(a.id);
+    return `<div class="spec-item" style="opacity: ${unlocked ? '1' : '0.5'}; border-color: ${unlocked ? 'rgba(81, 231, 123, 0.4)' : 'rgba(255,255,255,0.06)'}">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="material-symbols-outlined text-[18px] ${unlocked ? 'text-tertiary' : 'text-on-surface-variant'}">${a.icon}</span>
+        <div>
+          <strong style="font-size:12px; color:#fff;">${html(a.title)}</strong>
+          <p style="font-size:10px; color:#94a3b8; margin:0;">${html(a.description)}</p>
+        </div>
+      </div>
+      <span style="font-size:10px; font-weight:700; color:#ffd166; align-self:flex-end;">+${a.rewardCredits} Credits</span>
+    </div>`;
+  }).join('');
+
+  const activeColor = suits.find((c) => c.id === suit)?.accentColor || '#77e1e6';
 
   const content = `<main class="menu-subpage">
     <div style="margin-bottom:16px">${secondaryButton('Back to Main Menu', 'menu-home', 'back')}</div>
     <div class="menu-subheading">
-      <div class="eyebrow"><span class="eyebrow-line"></span> CREW REGISTRATION</div>
+      <div class="eyebrow"><span class="eyebrow-line"></span> CREW REGISTRATION & COSMETIC OUTFITTER</div>
       <h1>Customize character.</h1>
-      <p>Configure your astronaut callsign and flight suit accent color. Preferences are stored persistently on this device.</p>
+      <p>Configure your callsign, pressure suit, telemetry visor, and mission insignia. Unlock premium gear using Orbit Credits earned in flight simulation and Asteroid Run.</p>
     </div>
+
     <section class="customize-panel panel glass-card">
       <div class="character-preview">
         <div class="character-helmet" style="--suit:${activeColor}">
           <span>${html((customName || name || 'A').slice(0, 1).toUpperCase())}</span>
         </div>
         <span class="panel-index">CREW CALLSIGN · ${html(customName || name || 'FLIGHT DIRECTOR')}</span>
+        <div class="credits-pill" style="margin-top:4px;">
+          <span class="material-symbols-outlined text-[16px]">stars</span>
+          <span>${currentCredits} ORBIT CREDITS</span>
+        </div>
       </div>
+
       <div class="customize-options">
         <label class="field-label" for="custom-name">CALLSIGN</label>
         <input id="custom-name" maxlength="18" placeholder="Enter your callsign" value="${html(customName || name)}" autocomplete="nickname" />
-        <span class="field-label">SUIT ACCENT COLOR</span>
+
+        <span class="field-label" style="margin-top:14px;">PRESSURE SUIT ACCENT</span>
         <div class="suit-choices">${swatches}</div>
-        <div style="margin-top:14px">${primaryButton('SAVE PREFERENCES', 'save-customize', 'check')}</div>
+
+        <span class="field-label">HELMET VISOR CONFIGURATION</span>
+        <div class="suit-choices">${helmetOptions}</div>
+
+        <span class="field-label">CREW ACCESSORY</span>
+        <div class="suit-choices">${accessoryOptions}</div>
+
+        <span class="field-label">CADET INSIGNIA BADGE</span>
+        <div class="suit-choices">${badgeOptions}</div>
+
+        <div style="margin-top:18px">${primaryButton('SAVE PREFERENCES', 'save-customize', 'check')}</div>
+
+        <div style="margin-top:24px; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+          <span class="field-label">ACADEMY ACHIEVEMENTS (${ACHIEVEMENTS.filter(a => creditsManager.isAchievementUnlocked(a.id)).length}/${ACHIEVEMENTS.length})</span>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:8px; margin-top:8px;">
+            ${achievementsHtml}
+          </div>
+        </div>
       </div>
     </section>
   </main>`;
@@ -1131,27 +1260,116 @@ function render() {
     lobbyView.destroy();
     lobbyView = null;
   }
-  if (mode === 'menu' || !room) renderHome();
-  else if (room.phase === 'lobby') renderLobby();
-  else if (room.phase === 'design') renderDesign();
-  else if (room.phase === 'simulating') renderSimulating();
-  else renderResult();
+  if (mode === 'menu' || !room) {
+    audioManager.setMusicMood('menu');
+    renderHome();
+  }
+  else if (room.phase === 'lobby') {
+    audioManager.setMusicMood('design');
+    renderLobby();
+  }
+  else if (room.phase === 'design') {
+    audioManager.setMusicMood('design');
+    renderDesign();
+  }
+  else if (room.phase === 'simulating') {
+    audioManager.setMusicMood('launch');
+    renderSimulating();
+  }
+  else {
+    audioManager.setMusicMood('debrief');
+    renderResult();
+  }
 }
 
 // Global Click Dispatcher
 app.addEventListener('click', (event) => {
-  if (mode === 'wizard' || mode === 'lobby') return;
+  if (mode === 'wizard') return;
 
   const target = (event.target as HTMLElement).closest<HTMLElement>(
-    '[data-action], [data-category], [data-choice-id], [data-aod-date], [data-suit]'
+    '[data-action], [data-category], [data-choice-id], [data-aod-date], [data-suit], [data-item-id], [data-inventory-id], [data-inventory-tab]'
   );
   if (!target) return;
 
-  // Suit Selection
+  // Inventory tab switching
+  if (target.dataset.inventoryTab) {
+    audioManager.play('selection');
+    activeInventoryTab = target.dataset.inventoryTab as any;
+    selectedInventoryId = undefined;
+    render();
+    return;
+  }
+
+  // Inventory inspection
+  if (target.dataset.inventoryId) {
+    audioManager.play('selection');
+    selectedInventoryId = target.dataset.inventoryId;
+    render();
+    return;
+  }
+
+  if (mode === 'lobby') {
+    const isGlobalHeaderOrModalAction = [
+      'open-inventory',
+      'close-inventory',
+      'open-how-to-play',
+      'close-how-to-play',
+      'toggle-provenance',
+      'toggle-audio',
+      'toggle-music',
+      'home',
+      'menu-home',
+      'menu-main'
+    ].includes(target.dataset.action || '');
+    if (!isGlobalHeaderOrModalAction) return;
+  }
+
+  // Cosmetic item purchase or selection
+  if (target.dataset.itemId) {
+    const itemId = target.dataset.itemId;
+    const item = COSMETIC_CATALOG.find((c) => c.id === itemId);
+    if (item) {
+      if (!creditsManager.isUnlocked(itemId)) {
+        if (creditsManager.canAfford(itemId)) {
+          creditsManager.buyItem(itemId);
+          audioManager.play('success');
+          notice = `Unlocked ${item.name}!`;
+        } else {
+          audioManager.play('warning');
+          notice = `Insufficient Orbit Credits for ${item.name} (${item.cost} required).`;
+        }
+      } else {
+        audioManager.play('selection');
+        if (item.type === 'helmet') creditsManager.setCustomization({ helmetId: itemId });
+        else if (item.type === 'accessory') creditsManager.setCustomization({ accessoryId: itemId });
+        else if (item.type === 'badge') creditsManager.setCustomization({ badgeId: itemId });
+      }
+      render();
+      return;
+    }
+  }
+
+  // Suit Selection / Purchase
   if (target.dataset.suit) {
-    suit = suitChoices.some((c) => c.id === target.dataset.suit) ? target.dataset.suit! : 'cyan';
+    const suitId = target.dataset.suit;
+    const suitItem = COSMETIC_CATALOG.find((c) => c.id === suitId);
+    if (suitItem && !creditsManager.isUnlocked(suitId)) {
+      if (creditsManager.canAfford(suitId)) {
+        creditsManager.buyItem(suitId);
+        audioManager.play('success');
+        notice = `Unlocked ${suitItem.name} Suit!`;
+      } else {
+        audioManager.play('warning');
+        notice = `Insufficient Orbit Credits for ${suitItem.name} (${suitItem.cost} required).`;
+        render();
+        return;
+      }
+    }
+    audioManager.play('selection');
+    suit = suitId;
+    creditsManager.setCustomization({ suitId });
     localStorage.setItem('mission-player-suit', suit);
-    const chosenColor = suitChoices.find((c) => c.id === suit)?.color || '#77e1e6';
+    const chosenColor = suitItem?.accentColor || '#77e1e6';
     scene.update({ suitColor: chosenColor });
     render();
     return;
@@ -1159,6 +1377,7 @@ app.addEventListener('click', (event) => {
 
   // Design Tab Selection
   if (target.dataset.category) {
+    audioManager.play('selection');
     activeCategory = target.dataset.category;
     render();
     return;
@@ -1166,18 +1385,37 @@ app.addEventListener('click', (event) => {
 
   // Subsystem Component Choice
   if (target.dataset.choiceId && target.dataset.choiceCategory) {
+    audioManager.play('component_equip');
     sendAction({ type: 'set-config', key: target.dataset.choiceCategory, value: target.dataset.choiceId });
     return;
   }
 
   // Observation Date Selection
   if (target.dataset.aodDate) {
+    audioManager.play('selection');
     sendAction({ type: 'set-observation-date', value: target.dataset.aodDate });
     return;
   }
 
   // Navigation & Actions
-  switch (target.dataset.action) {
+  const action = target.dataset.action;
+  if (!action) return;
+
+  if (action === 'toggle-audio') {
+    audioManager.toggleMute();
+    render();
+    return;
+  }
+
+  if (action === 'toggle-music') {
+    audioManager.toggleMusicMute();
+    render();
+    return;
+  }
+
+  audioManager.play('ui_click');
+
+  switch (action) {
     case 'open-how-to-play':
       isHowToPlayOpen = true;
       render();
@@ -1249,6 +1487,16 @@ app.addEventListener('click', (event) => {
       break;
     case 'toggle-provenance':
       showProvenanceModal = !showProvenanceModal;
+      render();
+      break;
+    case 'open-inventory':
+      isInventoryOpen = true;
+      audioManager.play('selection');
+      creditsManager.unlockAchievement('science_curious');
+      render();
+      break;
+    case 'close-inventory':
+      isInventoryOpen = false;
       render();
       break;
     case 'create-room':
@@ -1416,6 +1664,11 @@ function handleHashChange() {
 }
 
 window.addEventListener('hashchange', handleHashChange);
+window.addEventListener('orbitone:audio-state-changed', () => {
+  if (mode !== 'wizard') {
+    render();
+  }
+});
 
 const initialRoute = getRouteFromHash();
 if (initialRoute === 'wizard') {

@@ -22,6 +22,9 @@ import { SocketIoTransport } from '../../multiplayer/socketIoTransport';
 import { MockTransport } from '../../multiplayer/mockTransport';
 import { primaryButton, secondaryButton } from '../components';
 import { renderIcon } from '../icons';
+import { audioManager } from '../../audio/audioManager';
+import { renderInventoryModal } from '../inventoryModal';
+import { creditsManager } from '../../credits/creditsManager';
 
 function escapeHtml(str: string): string {
   return String(str ?? '')
@@ -43,6 +46,7 @@ export class LobbyView {
   private preferredRole: TeamRole = 'mission_planner';
   private notice = '';
   private noticeType: 'info' | 'success' | 'warn' | 'error' = 'info';
+  private pendingOperation: 'create' | 'join' | 'reconnect' | 'sim' | null = null;
 
   private roomState: StateUpdatePayload | null = null;
   private localPlayerId = '';
@@ -51,6 +55,9 @@ export class LobbyView {
 
   private simResult: SimResultPayload | null = null;
   private unsubscribers: Array<() => void> = [];
+  private isInventoryOpen = false;
+  private selectedInventoryId?: string = undefined;
+  private activeInventoryTab: 'instruments' | 'missions' | 'tech' = 'instruments';
 
   constructor(container: HTMLElement, transport?: MultiplayerTransport) {
     this.container = container;
@@ -96,6 +103,7 @@ export class LobbyView {
         this.localPlayerId = data.playerId;
         this.localPlayerToken = data.playerToken;
         this.isHost = true;
+        this.pendingOperation = null;
 
         sessionStorage.setItem('orbitone-player-id', data.playerId);
         sessionStorage.setItem('orbitone-player-token', data.playerToken);
@@ -123,6 +131,7 @@ export class LobbyView {
         this.localPlayerId = data.playerId;
         this.localPlayerToken = data.playerToken;
         this.isHost = data.players[0]?.id === data.playerId;
+        this.pendingOperation = null;
 
         sessionStorage.setItem('orbitone-player-id', data.playerId);
         sessionStorage.setItem('orbitone-player-token', data.playerToken);
@@ -157,6 +166,7 @@ export class LobbyView {
 
     this.unsubscribers.push(
       this.transport.on('action_rejected', (data) => {
+        this.pendingOperation = null;
         this.notice = `Action rejected: ${data.reason}`;
         this.noticeType = 'error';
         this.render();
@@ -178,6 +188,7 @@ export class LobbyView {
 
     this.unsubscribers.push(
       this.transport.on('sim_result', (data: SimResultPayload) => {
+        this.pendingOperation = null;
         this.simResult = data;
         this.notice = `Mission simulation complete! Score: ${data.score.total} pts (${data.score.rank}) · Outcome: ${data.sim.outcome}`;
         this.noticeType = 'success';
@@ -187,6 +198,7 @@ export class LobbyView {
 
     this.unsubscribers.push(
       this.transport.on('error', (data) => {
+        this.pendingOperation = null;
         this.notice = `Server Message: ${data.message}`;
         this.noticeType = 'error';
         this.render();
@@ -309,7 +321,21 @@ export class LobbyView {
             <h1>Assemble your <em>space crew.</em></h1>
             <p>Collaborate in real-time with up to 4 crew members across specialized engineering disciplines.</p>
           </div>
-          <div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button class="button button-quiet" data-lobby-action="open-inventory" style="min-height:44px; padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
+              <span class="material-symbols-outlined text-[15px] text-tertiary">biotech</span>
+              <span>SCIENCE</span>
+            </button>
+            <div class="credits-pill" title="Orbit Credits" style="min-height:36px;">
+              <span class="material-symbols-outlined text-[16px]">stars</span>
+              <span>${creditsManager.getCredits()}</span>
+            </div>
+            <button class="audio-toggle-btn ${audioManager.isSfxEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-lobby-action="toggle-audio" style="min-width:44px; min-height:44px;" title="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}" aria-label="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isSfxEnabled() ? 'volume_up' : 'volume_off'}</span>
+            </button>
+            <button class="audio-toggle-btn ${audioManager.isMusicEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-lobby-action="toggle-music" style="min-width:44px; min-height:44px;" title="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}" aria-label="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isMusicEnabled() ? 'music_note' : 'music_off'}</span>
+            </button>
             ${secondaryButton('Back to Main Menu', 'lobby-exit', 'back')}
           </div>
         </header>
@@ -334,7 +360,10 @@ export class LobbyView {
             </div>
 
             <div style="margin-top:12px">
-              ${primaryButton('CREATE PRIVATE ROOM', 'lobby-create', 'rocket')}
+              ${primaryButton('CREATE PRIVATE ROOM', 'lobby-create', 'rocket', {
+                loading: this.pendingOperation === 'create',
+                loadingText: 'ESTABLISHING ROOM…'
+              })}
             </div>
           </section>
 
@@ -346,26 +375,30 @@ export class LobbyView {
 
             <div class="field-group">
               <label for="join-callsign">Your Callsign</label>
-              <input id="join-callsign" type="text" maxlength="30" value="${escapeHtml(this.callsign)}" placeholder="e.g. Specialist Alex" autocomplete="nickname" />
+              <input id="join-callsign" type="text" maxlength="30" value="${escapeHtml(this.callsign)}" placeholder="e.g. Specialist Alex" autocomplete="nickname" ${this.pendingOperation ? 'disabled' : ''} />
             </div>
 
             <div class="field-group">
               <label for="join-code">4-Letter Room Code</label>
-              <input id="join-code" class="room-code-input" type="text" maxlength="4" value="${escapeHtml(this.roomCodeInput)}" placeholder="ORBT" autocomplete="off" />
+              <input id="join-code" class="room-code-input" type="text" maxlength="4" value="${escapeHtml(this.roomCodeInput)}" placeholder="ORBT" autocomplete="off" ${this.pendingOperation ? 'disabled' : ''} />
             </div>
 
             <div class="field-group">
               <label for="join-role">Preferred Role</label>
-              <select id="join-role">
+              <select id="join-role" ${this.pendingOperation ? 'disabled' : ''}>
                 ${roleOptions}
               </select>
             </div>
 
             <div style="margin-top:12px">
-              ${secondaryButton('JOIN TEAM ROOM', 'lobby-join', 'planet')}
+              ${secondaryButton('JOIN TEAM ROOM', 'lobby-join', 'planet', {
+                loading: this.pendingOperation === 'join',
+                loadingText: 'JOINING CREW ROOM…'
+              })}
             </div>
           </section>
         </main>
+        ${this.isInventoryOpen ? renderInventoryModal(this.selectedInventoryId, this.activeInventoryTab) : ''}
       </div>
     `;
 
@@ -562,7 +595,21 @@ export class LobbyView {
             <h1>Mission Control <em>Room</em></h1>
           </div>
 
-          <div class="room-meta-group">
+          <div class="room-meta-group" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button class="button button-quiet" data-lobby-action="open-inventory" style="min-height:44px; padding:6px 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; border-radius:9999px;">
+              <span class="material-symbols-outlined text-[15px] text-tertiary">biotech</span>
+              <span>SCIENCE</span>
+            </button>
+            <div class="credits-pill" title="Orbit Credits" style="min-height:36px;">
+              <span class="material-symbols-outlined text-[16px]">stars</span>
+              <span>${creditsManager.getCredits()}</span>
+            </div>
+            <button class="audio-toggle-btn ${audioManager.isSfxEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-lobby-action="toggle-audio" style="min-width:44px; min-height:44px;" title="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}" aria-label="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isSfxEnabled() ? 'volume_up' : 'volume_off'}</span>
+            </button>
+            <button class="audio-toggle-btn ${audioManager.isMusicEnabled() ? 'is-audio-active' : 'is-audio-muted'}" data-lobby-action="toggle-music" style="min-width:44px; min-height:44px;" title="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}" aria-label="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isMusicEnabled() ? 'music_note' : 'music_off'}</span>
+            </button>
             <div class="room-code-badge">
               <span class="label">ROOM CODE</span>
               <span class="code">${escapeHtml(this.roomState.roomCode)}</span>
@@ -644,7 +691,11 @@ export class LobbyView {
                     ? primaryButton(
                         'START MISSION SIMULATION',
                         'lobby-start-sim',
-                        'rocket'
+                        'rocket',
+                        {
+                          loading: this.pendingOperation === 'sim',
+                          loadingText: 'INITIALIZING SIMULATION…'
+                        }
                       )
                     : '<span style="font-size:12px;color:var(--text-muted)">Waiting for flight director (host) to initiate simulation…</span>'
                 }
@@ -665,8 +716,8 @@ export class LobbyView {
                 }
               </p>
               <div class="dev-actions-grid">
-                <button type="button" class="dev-btn" data-lobby-action="test-reconnect">
-                  ↻ Test Disconnect & Reconnect
+                <button type="button" class="dev-btn ${this.pendingOperation === 'reconnect' ? 'btn-loading' : ''}" data-lobby-action="test-reconnect" ${this.pendingOperation === 'reconnect' ? 'disabled aria-busy="true"' : ''}>
+                  ${this.pendingOperation === 'reconnect' ? '<span class="orbital-spinner orbital-spinner-sm" role="status" aria-hidden="true"></span> Reconnecting…' : '↻ Test Disconnect & Reconnect'}
                 </button>
                 ${
                   isMock
@@ -725,6 +776,7 @@ export class LobbyView {
             </div>
           </aside>
         </main>
+        ${this.isInventoryOpen ? renderInventoryModal(this.selectedInventoryId, this.activeInventoryTab) : ''}
       </div>
     `;
 
@@ -739,6 +791,8 @@ export class LobbyView {
   private bindEntryEvents(): void {
     const createBtn = this.container.querySelector('[data-action="lobby-create"]');
     createBtn?.addEventListener('click', () => {
+      if (this.pendingOperation) return;
+      audioManager.play('ui_click');
       const callsignInput = this.container.querySelector<HTMLInputElement>('#create-callsign');
       const roleSelect = this.container.querySelector<HTMLSelectElement>('#create-role');
 
@@ -748,14 +802,24 @@ export class LobbyView {
       localStorage.setItem('mission-player-callsign', this.callsign);
       sessionStorage.setItem('mission-player-name', this.callsign);
 
+      this.pendingOperation = 'create';
+      this.render();
+
       void this.transport.send('create_room', {
         playerName: this.callsign,
         preferredRole: this.preferredRole
+      }).catch((err: any) => {
+        this.pendingOperation = null;
+        this.notice = `Failed to create room: ${err.message || err}`;
+        this.noticeType = 'error';
+        this.render();
       });
     });
 
     const joinBtn = this.container.querySelector('[data-action="lobby-join"]');
     joinBtn?.addEventListener('click', () => {
+      if (this.pendingOperation) return;
+      audioManager.play('ui_click');
       const callsignInput = this.container.querySelector<HTMLInputElement>('#join-callsign');
       const codeInput = this.container.querySelector<HTMLInputElement>('#join-code');
       const roleSelect = this.container.querySelector<HTMLSelectElement>('#join-role');
@@ -765,6 +829,7 @@ export class LobbyView {
       this.preferredRole = (roleSelect?.value as TeamRole) || 'spacecraft_engineer';
 
       if (code.length !== 4) {
+        audioManager.play('warning');
         this.notice = 'Please enter a valid 4-letter room code (e.g. "ORBT").';
         this.noticeType = 'warn';
         this.render();
@@ -774,23 +839,34 @@ export class LobbyView {
       localStorage.setItem('mission-player-callsign', this.callsign);
       sessionStorage.setItem('mission-player-name', this.callsign);
 
+      this.pendingOperation = 'join';
+      this.render();
+
       void this.transport.send('join_room', {
         roomCode: code,
         playerName: this.callsign,
         preferredRole: this.preferredRole
+      }).catch((err: any) => {
+        this.pendingOperation = null;
+        this.notice = `Failed to join room: ${err.message || err}`;
+        this.noticeType = 'error';
+        this.render();
       });
     });
 
     const exitBtn = this.container.querySelector('[data-action="lobby-exit"]');
     exitBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       this.onExitCallback();
     });
 
     this.container.querySelector('[data-lobby-action="switch-to-mock"]')?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       this.setTransport(new MockTransport());
     });
 
     this.container.querySelector('[data-lobby-action="switch-to-live"]')?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       this.setTransport(new SocketIoTransport());
     });
 
@@ -800,6 +876,7 @@ export class LobbyView {
   private bindRoomEvents(): void {
     const copyBtn = this.container.querySelector('[data-lobby-action="copy-code"]');
     copyBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       if (this.roomState?.roomCode) {
         void navigator.clipboard?.writeText(this.roomState.roomCode).then(() => {
           this.notice = `Room code "${this.roomState?.roomCode}" copied to clipboard!`;
@@ -811,6 +888,7 @@ export class LobbyView {
 
     const leaveBtn = this.container.querySelector('[data-action="lobby-leave"]');
     leaveBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       this.mode = 'entry';
       this.roomState = null;
       this.localPlayerId = '';
@@ -825,6 +903,7 @@ export class LobbyView {
     // Role switching
     this.container.querySelectorAll('[data-lobby-action="switch-role"]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
+        audioManager.play('selection');
         const target = (e.currentTarget as HTMLElement).dataset.role as TeamRole;
         if (target && this.roomState) {
           void this.transport.send('set_role', {
@@ -839,6 +918,7 @@ export class LobbyView {
     // Propose Decision buttons
     const proposeOrbitBtn = this.container.querySelector('[data-lobby-action="propose-orbit"]');
     proposeOrbitBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       if (this.roomState) {
         void this.transport.send('propose_decision', {
           roomCode: this.roomState.roomCode,
@@ -853,6 +933,7 @@ export class LobbyView {
 
     const proposeObjBtn = this.container.querySelector('[data-lobby-action="propose-objective"]');
     proposeObjBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       if (this.roomState) {
         void this.transport.send('propose_decision', {
           roomCode: this.roomState.roomCode,
@@ -867,6 +948,7 @@ export class LobbyView {
 
     const proposeVehBtn = this.container.querySelector('[data-lobby-action="propose-vehicle"]');
     proposeVehBtn?.addEventListener('click', () => {
+      audioManager.play('ui_click');
       if (this.roomState) {
         void this.transport.send('propose_decision', {
           roomCode: this.roomState.roomCode,
@@ -882,6 +964,7 @@ export class LobbyView {
     // Casting Votes
     this.container.querySelectorAll('[data-lobby-action="cast-vote"]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
+        audioManager.play('selection');
         const el = e.currentTarget as HTMLElement;
         const decision = el.dataset.decision;
         const choice = el.dataset.choice;
@@ -899,23 +982,33 @@ export class LobbyView {
     // Start Simulation (Host)
     const startSimBtn = this.container.querySelector('[data-action="lobby-start-sim"]');
     startSimBtn?.addEventListener('click', () => {
+      if (this.pendingOperation) return;
       if (this.roomState && this.isHost) {
+        audioManager.play('launch');
+        this.pendingOperation = 'sim';
+        this.render();
         void this.transport.send('start_sim', {
           roomCode: this.roomState.roomCode,
           playerId: this.localPlayerId,
           seed: 42,
           level: 1
+        }).catch((err: any) => {
+          this.pendingOperation = null;
+          this.notice = `Failed to start simulation: ${err.message || err}`;
+          this.noticeType = 'error';
+          this.render();
         });
       }
     });
 
     // Test Disconnect and Reconnect
     this.container.querySelector('[data-lobby-action="test-reconnect"]')?.addEventListener('click', async () => {
-      if (!this.roomState) return;
+      if (!this.roomState || this.pendingOperation) return;
       const roomCode = this.roomState.roomCode;
       const playerId = this.localPlayerId;
       const playerToken = this.localPlayerToken;
 
+      this.pendingOperation = 'reconnect';
       this.notice = 'Simulating network drop… disconnecting socket.';
       this.noticeType = 'warn';
       this.render();
@@ -935,8 +1028,11 @@ export class LobbyView {
             playerToken,
             preferredRole: this.preferredRole
           });
+          this.pendingOperation = null;
+          this.render();
         } catch (err: any) {
-          this.notice = `Reconnection failed: ${err.message}`;
+          this.pendingOperation = null;
+          this.notice = `Reconnection failed: ${err.message || err}`;
           this.noticeType = 'error';
           this.render();
         }
@@ -1002,6 +1098,54 @@ export class LobbyView {
     dismissBtn?.addEventListener('click', () => {
       this.notice = '';
       this.render();
+    });
+
+    // Audio toggles in multiplayer
+    this.container.querySelector('[data-lobby-action="toggle-audio"]')?.addEventListener('click', () => {
+      audioManager.toggleSfxMute();
+      this.render();
+    });
+    this.container.querySelector('[data-lobby-action="toggle-music"]')?.addEventListener('click', () => {
+      audioManager.toggleMusicMute();
+      this.render();
+    });
+
+    // Inventory modal toggles
+    this.container.querySelector('[data-lobby-action="open-inventory"]')?.addEventListener('click', () => {
+      audioManager.play('selection');
+      this.isInventoryOpen = true;
+      creditsManager.unlockAchievement('science_curious');
+      this.render();
+    });
+    this.container.querySelector('[data-action="close-inventory"]')?.addEventListener('click', () => {
+      audioManager.play('ui_click');
+      this.isInventoryOpen = false;
+      this.render();
+    });
+
+    // Inventory tab switching
+    this.container.querySelectorAll('[data-inventory-tab]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const tab = (el as HTMLElement).dataset.inventoryTab as any;
+        if (tab) {
+          audioManager.play('selection');
+          this.activeInventoryTab = tab;
+          this.selectedInventoryId = undefined;
+          this.render();
+        }
+      });
+    });
+
+    // Inventory card clicks
+    this.container.querySelectorAll('[data-inventory-id]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const id = (el as HTMLElement).dataset.inventoryId;
+        if (id) {
+          audioManager.play('selection');
+          this.selectedInventoryId = id;
+          this.render();
+        }
+      });
     });
   }
 }
