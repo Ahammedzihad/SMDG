@@ -50,7 +50,8 @@ export function renderLaunchStage(
   vehicle: Vehicle,
   onLaunchSimAction: string = 'trigger-launch',
   telemetry?: LaunchTelemetryState,
-  downlinkRateMbps?: number
+  downlinkRateMbps?: number,
+  observeTimeFraction: number = 0.50
 ): string {
   const canLaunch = validation.passed;
   const failedChecks = validation.checks.filter((c) => !c.passed && !c.isWarning);
@@ -282,6 +283,10 @@ export function renderLaunchStage(
               <tr class="border-b border-white/5">
                 <th class="py-2 text-on-surface-variant font-medium">Nominal Component Downlink Throughput:</th>
                 <td class="py-2 text-on-surface font-semibold">${ratedThroughputMbps} Mbps</td>
+              </tr>
+              <tr class="border-b border-white/5">
+                <th class="py-2 text-on-surface-variant font-medium">Observation Time Duty:</th>
+                <td class="py-2 text-secondary font-mono font-semibold">${(observeTimeFraction * 100).toFixed(0)}% (${observeTimeFraction.toFixed(2)})</td>
               </tr>
               <tr class="border-b border-white/5">
                 <th class="py-2 text-on-surface-variant font-medium">Launch Vehicle:</th>

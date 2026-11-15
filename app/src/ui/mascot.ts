@@ -24,7 +24,7 @@ import type {
 import { renderIcon } from './icons';
 
 export interface ActiveSelectionContext {
-  type: 'objective' | 'orbit' | 'vehicle' | 'class' | 'part' | 'check' | 'none';
+  type: 'objective' | 'orbit' | 'vehicle' | 'class' | 'part' | 'check' | 'parameter' | 'none';
   id?: string;
   name?: string;
 }
@@ -128,6 +128,19 @@ export function getNovaContextMessage(
         status: 'ready'
       };
     }
+  }
+
+  if (selection && selection.type === 'parameter' && selection.id === 'observe_time_fraction') {
+    const fraction = design.observe_time_fraction ?? 0.50;
+    const pct = Math.round(fraction * 100);
+    return {
+      eyebrow: `NOVA // SCIENCE DUTY CYCLE: ${pct}%`,
+      speech: `Adjusting active observation time to ${pct}% directly scales daily data collection. Higher duty cycles generate more raw science but demand adequate ground station downlink to prevent memory buffer overflow!`,
+      tradeoff: 'Longer observation runs capture more science measurements, but exceeding daily downlink throughput risks overflowing onboard solid-state memory and losing observations.',
+      engineImpact: `Observe Time: ${(fraction).toFixed(2)} (${pct}%) | Daily Data: ${meters.data.value.toFixed(2)} GB/day`,
+      nasaFact: 'NASA missions like Landsat and Terra balance instrument active duty cycle against ground pass contact schedules to eliminate data loss.',
+      status: fraction > 0.53 ? 'caution' : 'ready'
+    };
   }
 
   if (selection && selection.type === 'orbit' && selection.id) {

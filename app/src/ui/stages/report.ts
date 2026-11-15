@@ -194,6 +194,7 @@ export function renderReportStage(
         <div class="outcome-header">
           <span class="outcome-badge" style="display:inline-flex; align-items:center; gap:4px">${outcomeInfo.icon} ${outcomeInfo.badge}</span>
           <span class="mission-duration" style="display:inline-flex; align-items:center; gap:4px">${renderIcon('time', 13)} ${sim.lifetime_months} MONTHS FLIGHT DURATION</span>
+          ${sim.design?.observe_time_fraction !== undefined ? `<span class="observe-duty" style="display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:11px; color:var(--brand-cyan)">${(sim.design.observe_time_fraction * 100).toFixed(0)}% OBSERVE DUTY</span>` : ''}
         </div>
         <h3>${outcomeInfo.title}</h3>
         <p>Science Data Collected: <b>${sim.science_collected.toFixed(1)} pts</b> (${sim.data_transmitted_total_gb.toFixed(1)} GB downlinked, ${sim.data_lost_total_gb.toFixed(1)} GB lost to overflow).</p>

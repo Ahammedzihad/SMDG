@@ -20,7 +20,8 @@ function escapeHtml(str: string): string {
 export function renderReviewStage(
   validation: MissionValidationResult,
   meters: Meters,
-  onDescopeAction: string = 'descope-action'
+  onDescopeAction: string = 'descope-action',
+  observeTimeFraction: number = 0.50
 ): string {
   const hardChecks = validation.checks.filter((c) => !c.isWarning);
   const softWarnings = validation.warnings;
@@ -104,6 +105,26 @@ export function renderReviewStage(
                 : 'One or more hard engineering checks failed. Return to earlier design stages or apply descope options to achieve flight clearance.'
             }
           </p>
+        </div>
+      </div>
+
+      <!-- Mission Architecture & Operational Duty Parameters -->
+      <div class="review-specs-bar glass-card" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-bottom:16px; padding:12px 16px; background:rgba(0,0,0,0.25); border:1px solid var(--border-glass); border-radius:10px;">
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-family:var(--font-heading)">Objective Target</span>
+          <strong style="font-size:13px; color:#fff">Earth Observation</strong>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-family:var(--font-heading)">Observation Time Duty</span>
+          <strong style="font-size:13px; color:var(--brand-cyan); font-family:var(--mono)">${(observeTimeFraction * 100).toFixed(0)}% (${observeTimeFraction.toFixed(2)})</strong>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-family:var(--font-heading)">Daily Payload Data</span>
+          <strong style="font-size:13px; color:#fff; font-family:var(--mono)">${meters.data.value.toFixed(2)} GB/day</strong>
+        </div>
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-family:var(--font-heading)">Ground Downlink Cap</span>
+          <strong style="font-size:13px; color:var(--brand-green); font-family:var(--mono)">${meters.communications.value.toFixed(2)} GB/day</strong>
         </div>
       </div>
 

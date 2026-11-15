@@ -51,7 +51,8 @@ const OBJECTIVE_ART_MAP: Record<string, { image: string; tag: string; icon: stri
 export function renderObjectiveStage(
   objectives: Objective[],
   selectedId: string,
-  onSelectAction: string = 'select-objective'
+  onSelectAction: string = 'select-objective',
+  selectedObserveTimeFraction: number = 0.50
 ): string {
   const cards = objectives
     .map((obj) => {
@@ -145,6 +146,55 @@ export function renderObjectiveStage(
                 </span>
               </div>
             </div>
+
+            ${
+              obj.id === 'earth_observation'
+                ? `
+            <!-- Observation Time Duty Parameter Control (Earth Observation) -->
+            <div
+              class="observation-duty-control p-space-xs px-space-sm rounded-lg bg-surface-container-low/90 border border-white/10 space-y-space-xs"
+            >
+              <div class="flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                  Observation Time
+                </span>
+                <span class="font-label-sm text-label-sm text-secondary font-mono font-bold" id="observe-duty-display">
+                  ${(selectedObserveTimeFraction * 100).toFixed(0)}% (${selectedObserveTimeFraction.toFixed(2)})
+                </span>
+              </div>
+              <p class="font-body-sm text-[11px] text-on-surface-variant leading-tight">
+                Daily fraction spent actively observing targets. Affects science collection volume and ground downlink buffer margin.
+              </p>
+              <div class="grid grid-cols-3 gap-1.5 pt-0.5" role="radiogroup" aria-label="Earth Observation Time Fraction">
+                ${[0.50, 0.53, 0.54]
+                  .map((fraction) => {
+                    const isFracActive = Math.abs(selectedObserveTimeFraction - fraction) < 0.001;
+                    const label = fraction.toFixed(2);
+                    const sub = fraction === 0.50 ? 'Default' : fraction === 0.53 ? 'High' : 'Max';
+                    return `
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="${isFracActive}"
+                        data-action="select-observe-fraction"
+                        data-fraction="${fraction.toFixed(2)}"
+                        class="py-1 px-1.5 rounded flex flex-col items-center justify-center transition-all ${
+                          isFracActive
+                            ? 'bg-secondary text-on-secondary font-bold shadow-[0_0_8px_rgba(123,208,255,0.4)] border border-secondary'
+                            : 'bg-surface-container-highest/80 hover:bg-surface-container-highest text-on-surface border border-white/5'
+                        }"
+                      >
+                        <span class="font-mono text-[12px] leading-tight font-bold">${label}</span>
+                        <span class="text-[9px] uppercase tracking-wider opacity-85 leading-none mt-0.5">${sub}</span>
+                      </button>
+                    `;
+                  })
+                  .join('')}
+              </div>
+            </div>
+            `
+                : ''
+            }
           </div>
 
           <!-- Bottom Selection Check Indicator -->
