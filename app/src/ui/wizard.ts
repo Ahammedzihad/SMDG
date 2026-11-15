@@ -296,6 +296,20 @@ export class MissionWizard {
     this.render();
   }
 
+  public selectObserveTimeFraction(fraction: number): void {
+    const validFractions = [0.50, 0.53, 0.54];
+    const match = validFractions.find((f) => Math.abs(f - fraction) < 0.001);
+    if (match === undefined) {
+      console.warn(`[MissionWizard] Invalid observe_time_fraction rejected: ${fraction}`);
+      return;
+    }
+    this.state.design.objective_id = 'earth_observation';
+    this.state.design.observe_time_fraction = match;
+    this.activeSelection = { type: 'parameter', id: 'observe_time_fraction' };
+    this.syncSceneWithDesign();
+    this.render();
+  }
+
   public selectOrbit(orbitId: string): void {
     if (!this.orbits.some((o) => o.id === orbitId)) {
       console.warn(`[MissionWizard] Unknown orbit ID rejected: "${orbitId}"`);
@@ -518,7 +532,12 @@ export class MissionWizard {
     let stageContentHtml = '';
     switch (this.state.currentStage) {
       case 1:
-        stageContentHtml = renderObjectiveStage(this.objectives, design.objective_id ?? this.objectives[0].id);
+        stageContentHtml = renderObjectiveStage(
+          this.objectives,
+          design.objective_id ?? this.objectives[0].id,
+          'select-objective',
+          design.observe_time_fraction ?? 0.50
+        );
         break;
       case 2:
         stageContentHtml = renderRequirementsStage(currentObjective, meters, validation);
@@ -537,7 +556,12 @@ export class MissionWizard {
         );
         break;
       case 5:
-        stageContentHtml = renderReviewStage(validation, meters);
+        stageContentHtml = renderReviewStage(
+          validation,
+          meters,
+          'descope-action',
+          design.observe_time_fraction ?? 0.50
+        );
         break;
       case 6: {
         const flightSteps = buildFlightSteps(currentOrbit);
@@ -573,7 +597,8 @@ export class MissionWizard {
           currentVehicle,
           'trigger-launch',
           telemetryState,
-          dataRateMbps
+          dataRateMbps,
+          design.observe_time_fraction ?? 0.50
         );
         break;
       }
@@ -727,6 +752,16 @@ export class MissionWizard {
           case 'select-objective': {
             const id = target.getAttribute('data-id');
             if (id) this.selectObjective(id);
+            break;
+          }
+          case 'select-observe-fraction': {
+            const fractionStr = target.getAttribute('data-fraction');
+            if (fractionStr) {
+              const fraction = parseFloat(fractionStr);
+              if (!isNaN(fraction)) {
+                this.selectObserveTimeFraction(fraction);
+              }
+            }
             break;
           }
           case 'select-orbit': {
