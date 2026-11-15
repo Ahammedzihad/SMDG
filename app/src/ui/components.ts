@@ -31,16 +31,23 @@ function parseAttrs(actionOrAttrs?: string | Record<string, string>): string {
 export function primaryButton(
   text: string,
   actionOrAttrs?: string | Record<string, string>,
-  iconName?: IconName | string
+  iconName?: IconName | string,
+  options?: { loading?: boolean; loadingText?: string }
 ): string {
+  const isLoading = Boolean(options?.loading);
+  const extraAttrs = isLoading ? 'disabled aria-busy="true"' : '';
+  const loadingClass = isLoading ? ' btn-loading' : '';
   const attrs = parseAttrs(actionOrAttrs);
-  const iconHtml = iconName
+  const iconHtml = isLoading
+    ? `<span class="orbital-spinner orbital-spinner-sm" role="status" aria-hidden="true"></span>`
+    : iconName
     ? `<span class="btn-icon" aria-hidden="true">${renderIcon(iconName as IconName, 18)}</span>`
     : '';
+  const labelText = isLoading && options?.loadingText ? options.loadingText : text;
   return `
-    <button type="button" class="button button-primary btn-chunky" ${attrs}>
+    <button type="button" class="button button-primary btn-chunky${loadingClass}" ${attrs} ${extraAttrs}>
       ${iconHtml}
-      <span>${escapeHtml(text)}</span>
+      <span>${escapeHtml(labelText)}</span>
     </button>
   `;
 }
@@ -52,16 +59,23 @@ export function primaryButton(
 export function secondaryButton(
   text: string,
   actionOrAttrs?: string | Record<string, string>,
-  iconName?: IconName | string
+  iconName?: IconName | string,
+  options?: { loading?: boolean; loadingText?: string }
 ): string {
+  const isLoading = Boolean(options?.loading);
+  const extraAttrs = isLoading ? 'disabled aria-busy="true"' : '';
+  const loadingClass = isLoading ? ' btn-loading' : '';
   const attrs = parseAttrs(actionOrAttrs);
-  const iconHtml = iconName
+  const iconHtml = isLoading
+    ? `<span class="orbital-spinner orbital-spinner-sm" role="status" aria-hidden="true"></span>`
+    : iconName
     ? `<span class="btn-icon" aria-hidden="true">${renderIcon(iconName as IconName, 18)}</span>`
     : '';
+  const labelText = isLoading && options?.loadingText ? options.loadingText : text;
   return `
-    <button type="button" class="button button-secondary btn-chunky" ${attrs}>
+    <button type="button" class="button button-secondary btn-chunky${loadingClass}" ${attrs} ${extraAttrs}>
       ${iconHtml}
-      <span>${escapeHtml(text)}</span>
+      <span>${escapeHtml(labelText)}</span>
     </button>
   `;
 }

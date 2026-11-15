@@ -42,9 +42,64 @@ import { renderLaunchStage, type LaunchTelemetryState } from './stages/launch';
 import { renderReportStage } from './stages/report';
 import { renderResourceBar } from './resourceBar';
 import { renderExplainPanel, type ExplainContent } from './explainPanel';
-import { getNovaContextMessage, type ActiveSelectionContext } from './mascot';
+import { getNovaContextMessage, type ActiveSelectionContext, type LastActionNotice } from './mascot';
 import { missionPath, primaryButton, secondaryButton } from './components';
 import { renderHowToPlayModal } from './howToPlay';
+import { renderInventoryModal } from './inventoryModal';
+import { AsteroidRunGame } from '../minigame/asteroidRun';
+import { creditsManager } from '../credits/creditsManager';
+import { audioManager } from '../audio/audioManager';
+
+export class TypewriterController {
+  private timer: number | null = null;
+  private currentElement: HTMLElement | null = null;
+  private fullText: string = '';
+
+  public start(element: HTMLElement, text: string): void {
+    this.stop();
+    this.currentElement = element;
+    this.fullText = text;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      element.textContent = text;
+      return;
+    }
+
+    element.textContent = '';
+    let index = 0;
+    this.timer = window.setInterval(() => {
+      index += 2;
+      if (index <= text.length) {
+        element.textContent = text.slice(0, index);
+      } else {
+        element.textContent = text;
+        this.stop();
+      }
+    }, 20);
+  }
+
+  public complete(): void {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.currentElement) {
+      this.currentElement.textContent = this.fullText;
+    }
+  }
+
+  public stop(): void {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+}
 
 export const STAGE_NAMES = [
   'Objective (CML 1)',
@@ -177,6 +232,16 @@ export class MissionWizard {
   private activePartCategory: string = 'all';
   private activeSelection: ActiveSelectionContext | null = null;
   private isHowToPlayOpen: boolean = false;
+  private designHistory: MissionDesign[] = [];
+  private typewriter: TypewriterController = new TypewriterController();
+  private isNovaMinimized: boolean = false;
+  private lastActionNotice?: LastActionNotice;
+  private hasPlayedMissionComplete: boolean = false;
+  private isInventoryOpen: boolean = false;
+  private selectedInventoryId?: string = undefined;
+  private activeInventoryTab: 'instruments' | 'missions' | 'tech' = 'instruments';
+  private isAsteroidRunActive: boolean = false;
+  private asteroidGame: AsteroidRunGame | null = null;
 
   constructor(container: HTMLElement, scene?: ReturnType<typeof createMissionScene>) {
     this.container = container;
@@ -200,6 +265,14 @@ export class MissionWizard {
 
     this.attachEventListeners();
     this.syncSceneWithDesign();
+
+    window.addEventListener(
+      'orbitone:audio-state-changed',
+      () => {
+        this.render();
+      },
+      { signal: this.abortController.signal }
+    );
   }
 
   private getDefaultDesign(): MissionDesign {
@@ -236,6 +309,7 @@ export class MissionWizard {
   }
 
   public destroy(): void {
+    this.typewriter.stop();
     if (this.flightTimer) {
       clearInterval(this.flightTimer);
       this.flightTimer = null;
@@ -255,6 +329,9 @@ export class MissionWizard {
   public setStage(stageNumber: number): void {
     if (stageNumber < 1 || stageNumber > 7) return;
 
+    this.typewriter.stop();
+    this.lastActionNotice = undefined;
+
     // Leaving launch stage while simulating? Reset simulation state gracefully
     if (this.state.currentStage === 6 && stageNumber !== 6 && this.isSimulating) {
       if (this.flightTimer) {
@@ -265,18 +342,62 @@ export class MissionWizard {
       this.scene.setSimState({ mode: 'orbit', progress: 1 });
     }
 
+    const previousStage = this.state.currentStage;
+    if (previousStage === stageNumber) {
+      this.render();
+      return;
+    }
+
     this.activeSelection = null;
     this.state.currentStage = stageNumber;
     if (stageNumber > this.state.maxStageReached) {
       this.state.maxStageReached = stageNumber;
     }
+
+    if (stageNumber === 5) {
+      const validation = runChecks(this.state.design);
+      audioManager.play(validation.passed ? 'success' : 'warning');
+    } else if (stageNumber === 7) {
+      if (!this.hasPlayedMissionComplete) {
+        this.hasPlayedMissionComplete = true;
+        audioManager.play('mission_complete');
+        creditsManager.addCredits(200, 'Mission Flight Complete');
+        creditsManager.unlockAchievement('flight_complete');
+      } else {
+        audioManager.play('stage_transition');
+      }
+    } else {
+      audioManager.play('stage_transition');
+    }
+
     this.render();
   }
 
   public nextStage(): void {
+    if (this.state.currentStage === 4 && !this.isAsteroidRunActive) {
+      // Route between Stage 4 and Stage 5 through Asteroid Run
+      creditsManager.unlockAchievement('first_assembly');
+      this.startAsteroidRun();
+      return;
+    }
     if (this.state.currentStage < 7) {
       this.setStage(this.state.currentStage + 1);
     }
+  }
+
+  public startAsteroidRun(): void {
+    this.isAsteroidRunActive = true;
+    audioManager.play('selection');
+    this.render();
+  }
+
+  public finishAsteroidRun(): void {
+    if (this.asteroidGame) {
+      this.asteroidGame.destroy();
+      this.asteroidGame = null;
+    }
+    this.isAsteroidRunActive = false;
+    this.setStage(5);
   }
 
   public prevStage(): void {
@@ -290,6 +411,7 @@ export class MissionWizard {
       console.warn(`[MissionWizard] Unknown objective ID rejected: "${objectiveId}"`);
       return;
     }
+    audioManager.play('selection');
     this.state.design.objective_id = objectiveId;
     this.activeSelection = { type: 'objective', id: objectiveId };
     this.syncSceneWithDesign();
@@ -303,6 +425,7 @@ export class MissionWizard {
       console.warn(`[MissionWizard] Invalid observe_time_fraction rejected: ${fraction}`);
       return;
     }
+    audioManager.play('selection');
     this.state.design.objective_id = 'earth_observation';
     this.state.design.observe_time_fraction = match;
     this.activeSelection = { type: 'parameter', id: 'observe_time_fraction' };
@@ -315,6 +438,7 @@ export class MissionWizard {
       console.warn(`[MissionWizard] Unknown orbit ID rejected: "${orbitId}"`);
       return;
     }
+    audioManager.play('selection');
     this.state.design.orbit_id = orbitId;
     this.activeSelection = { type: 'orbit', id: orbitId };
     this.syncSceneWithDesign();
@@ -326,8 +450,40 @@ export class MissionWizard {
       console.warn(`[MissionWizard] Unknown vehicle ID rejected: "${vehicleId}"`);
       return;
     }
+    audioManager.play('selection');
     this.state.design.vehicle_id = vehicleId;
     this.activeSelection = { type: 'vehicle', id: vehicleId };
+    this.syncSceneWithDesign();
+    this.render();
+  }
+
+  private pushDesignHistory(): void {
+    const snapshot: MissionDesign = JSON.parse(JSON.stringify(this.state.design));
+    this.designHistory.push(snapshot);
+    if (this.designHistory.length > 25) {
+      this.designHistory.shift();
+    }
+  }
+
+  public undoDesign(): void {
+    if (this.designHistory.length === 0) return;
+    audioManager.play('ui_click');
+    const previous = this.designHistory.pop()!;
+    this.state.design = previous;
+    this.activeSelection = null;
+    this.lastActionNotice = { type: 'undo' };
+    this.syncSceneWithDesign();
+    this.render();
+  }
+
+  public resetStage4Design(): void {
+    this.pushDesignHistory();
+    audioManager.play('ui_click');
+    const defaultDesign = this.getDefaultDesign();
+    this.state.design.cubesat_class_id = defaultDesign.cubesat_class_id;
+    this.state.design.part_ids = [...defaultDesign.part_ids];
+    this.activeSelection = null;
+    this.lastActionNotice = { type: 'reset' };
     this.syncSceneWithDesign();
     this.render();
   }
@@ -337,6 +493,8 @@ export class MissionWizard {
       console.warn(`[MissionWizard] Unknown class ID rejected: "${classId}"`);
       return;
     }
+    audioManager.play('selection');
+    this.pushDesignHistory();
     this.state.design.cubesat_class_id = classId;
     this.activeSelection = { type: 'class', id: classId };
 
@@ -366,20 +524,34 @@ export class MissionWizard {
       return;
     }
 
+    this.pushDesignHistory();
     const current = this.state.design.part_ids;
     if (current.includes(partId)) {
       // Remove component
+      this.lastActionNotice = { type: 'remove', partId };
       this.state.design.part_ids = current.filter((id) => id !== partId);
+      audioManager.play('component_remove');
     } else {
-      // Add component with structural replacement
+      // Add component with exclusive category slot replacement
       let nextParts = [...current];
-      if (validPart.category === 'structure') {
-        const structurePartIds = this.parts.filter((p) => p.category === 'structure').map((p) => p.id);
-        nextParts = nextParts.filter((id) => !structurePartIds.includes(id));
+      const EXCLUSIVE_CATEGORIES = ['structure', 'power', 'battery', 'comms', 'adcs', 'computer', 'instrument'];
+      let replacedId: string | undefined;
+      if (EXCLUSIVE_CATEGORIES.includes(validPart.category)) {
+        const sameCategoryPartIds = this.parts
+          .filter((p) => p.category === validPart.category)
+          .map((p) => p.id);
+        replacedId = nextParts.find((id) => sameCategoryPartIds.includes(id));
+        nextParts = nextParts.filter((id) => !sameCategoryPartIds.includes(id));
       }
       nextParts.push(partId);
       // Duplicate selection handling
       this.state.design.part_ids = Array.from(new Set(nextParts));
+      if (replacedId) {
+        this.lastActionNotice = { type: 'replace', partId, oldPartId: replacedId };
+      } else {
+        this.lastActionNotice = { type: 'add', partId };
+      }
+      audioManager.play('component_equip');
     }
     this.activeSelection = { type: 'part', id: partId };
     this.syncSceneWithDesign();
@@ -390,6 +562,7 @@ export class MissionWizard {
     // 1. Hard Gate: Do not launch if validation checks fail!
     const validation = runChecks(this.state.design);
     if (!validation.passed) {
+      audioManager.play('warning');
       return;
     }
 
@@ -397,6 +570,8 @@ export class MissionWizard {
     if (this.isSimulating) {
       return;
     }
+
+    audioManager.play('launch');
 
     // 3. Run authentic simulation and scoring
     const sim = runSimulation(this.state.design, 42, 1);
@@ -464,9 +639,11 @@ export class MissionWizard {
       this.flightTimer = null;
     }
     this.isSimulating = false;
+    this.hasPlayedMissionComplete = false;
     this.flightStepIndex = 0;
     this.flightLogs = [];
     this.activeSelection = null;
+    this.designHistory = [];
     this.state.design = this.getDefaultDesign();
     this.state.simResult = null;
     this.state.score = null;
@@ -493,7 +670,8 @@ export class MissionWizard {
       },
       this.state.simResult,
       this.state.score,
-      this.state.report
+      this.state.report,
+      this.lastActionNotice
     );
 
     return {
@@ -508,7 +686,20 @@ export class MissionWizard {
     };
   }
 
+  private updateMusicMoodForStage(stage: number): void {
+    if (stage === 4) {
+      audioManager.setMusicMood('assembly');
+    } else if (stage === 6) {
+      audioManager.setMusicMood('launch');
+    } else if (stage === 7) {
+      audioManager.setMusicMood('debrief');
+    } else {
+      audioManager.setMusicMood('design');
+    }
+  }
+
   public render(): void {
+    this.updateMusicMoodForStage(this.state.currentStage);
     const design = this.state.design;
     const meters = computeMeters(design);
     const validation = runChecks(design);
@@ -552,7 +743,14 @@ export class MissionWizard {
           this.parts,
           design.part_ids,
           this.activePartCategory,
-          meters
+          meters,
+          'select-class',
+          'toggle-part',
+          'filter-category',
+          'focus-part',
+          this.designHistory.length > 0,
+          'undo-design',
+          'reset-stage4'
         );
         break;
       case 5:
@@ -620,7 +818,7 @@ export class MissionWizard {
 
     // Right explain panel (Commander Nova Co-Pilot Module)
     const explainContent = this.getExplainContent(meters, validation);
-    const explainHtml = renderExplainPanel(explainContent);
+    const explainHtml = renderExplainPanel(explainContent, this.isNovaMinimized);
     const novaShortTip = explainContent.summary.split('.')[0] + '.';
 
     // Navigation buttons
@@ -663,14 +861,25 @@ export class MissionWizard {
           </div>
 
           <div class="flex items-center gap-space-sm">
-            <button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all cursor-pointer shadow-sm" type="button" data-action="open-how-to-play">
+            <button style="min-height: 44px; min-width: 44px;" class="flex items-center justify-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all cursor-pointer shadow-sm" type="button" data-action="open-how-to-play" title="How to play" aria-label="How to play">
               <span class="material-symbols-outlined text-[16px] text-secondary">help</span>
-              <span class="font-label-sm text-label-sm uppercase tracking-wider">How to play</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-wider hidden sm:inline">How to play</span>
             </button>
-            <button class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface flex items-center justify-center transition-all cursor-pointer shadow-sm" type="button" data-action="toggle-audio" title="Audio Sound">
-              <span class="material-symbols-outlined text-[18px]">volume_up</span>
+            <button style="min-height: 44px; min-width: 44px;" class="flex items-center justify-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all cursor-pointer shadow-sm" type="button" data-action="open-inventory" title="Scientific Instrument Inventory" aria-label="Scientific Instrument Inventory">
+              <span class="material-symbols-outlined text-[16px] text-tertiary">biotech</span>
+              <span class="font-label-sm text-label-sm uppercase tracking-wider hidden sm:inline">Science</span>
             </button>
-            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-md cursor-pointer" data-action="exit-wizard" title="Cadet Profile">
+            <div class="credits-pill hidden sm:inline-flex" title="Orbit Credits" style="min-height:36px;">
+              <span class="material-symbols-outlined text-[16px]">stars</span>
+              <span>${creditsManager.getCredits()}</span>
+            </div>
+            <button style="min-width: 44px; min-height: 44px;" class="audio-toggle-btn w-11 h-11 rounded-full ${audioManager.isSfxEnabled() ? 'is-audio-active' : 'is-audio-muted'} flex items-center justify-center transition-all cursor-pointer shadow-sm" type="button" data-action="toggle-audio" title="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}" aria-label="${audioManager.isSfxEnabled() ? 'Mute Sound Effects' : 'Unmute Sound Effects'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isSfxEnabled() ? 'volume_up' : 'volume_off'}</span>
+            </button>
+            <button style="min-width: 44px; min-height: 44px;" class="audio-toggle-btn w-11 h-11 rounded-full ${audioManager.isMusicEnabled() ? 'is-audio-active' : 'is-audio-muted'} flex items-center justify-center transition-all cursor-pointer shadow-sm" type="button" data-action="toggle-music" title="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}" aria-label="${audioManager.isMusicEnabled() ? 'Mute Ambient Music' : 'Unmute Ambient Music'}">
+              <span class="material-symbols-outlined text-[18px]">${audioManager.isMusicEnabled() ? 'music_note' : 'music_off'}</span>
+            </button>
+            <div style="min-width: 44px; min-height: 44px;" class="w-11 h-11 rounded-full bg-primary flex items-center justify-center shadow-md cursor-pointer" data-action="exit-wizard" title="Cadet Profile">
               <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
             </div>
           </div>
@@ -702,6 +911,33 @@ export class MissionWizard {
       </footer>
     `;
 
+    if (this.isAsteroidRunActive) {
+      this.container.innerHTML = `
+        <div class="orbitone-game-shell pt-16 pb-24">
+          ${flightDeckHeader}
+          ${resourceBarHtml}
+          <div class="w-full max-w-7xl mx-auto px-gutter mt-4">
+            <div id="asteroid-minigame-host"></div>
+          </div>
+          ${this.isHowToPlayOpen ? renderHowToPlayModal() : ''}
+          ${this.isInventoryOpen ? renderInventoryModal(this.selectedInventoryId, this.activeInventoryTab) : ''}
+        </div>
+      `;
+
+      const host = this.container.querySelector<HTMLElement>('#asteroid-minigame-host');
+      if (host) {
+        if (this.asteroidGame) {
+          this.asteroidGame.destroy();
+        }
+        this.asteroidGame = new AsteroidRunGame(host);
+        this.asteroidGame.onContinue(() => {
+          this.finishAsteroidRun();
+        });
+        this.asteroidGame.start();
+      }
+      return;
+    }
+
     this.container.innerHTML = `
       <div class="orbitone-game-shell pt-16 pb-24">
         ${flightDeckHeader}
@@ -716,6 +952,7 @@ export class MissionWizard {
         </div>
         ${commandDeckFooter}
         ${this.isHowToPlayOpen ? renderHowToPlayModal() : ''}
+        ${this.isInventoryOpen ? renderInventoryModal(this.selectedInventoryId, this.activeInventoryTab) : ''}
       </div>
     `;
 
@@ -725,19 +962,64 @@ export class MissionWizard {
       this.scene.mount(sceneHost);
     }
     this.syncSceneWithDesign();
+
+    // Typewriter text reveal for Commander Nova speech
+    const typewriterTarget = this.container.querySelector<HTMLElement>('.typewriter-target');
+    if (typewriterTarget) {
+      this.typewriter.start(typewriterTarget, explainContent.summary);
+    }
   }
 
   private attachEventListeners(): void {
     this.container.addEventListener(
       'click',
       (e) => {
+        const tabEl = (e.target as HTMLElement).closest<HTMLElement>('[data-inventory-tab]');
+        if (tabEl && tabEl.dataset.inventoryTab) {
+          audioManager.play('selection');
+          this.activeInventoryTab = tabEl.dataset.inventoryTab as any;
+          this.selectedInventoryId = undefined;
+          this.render();
+          return;
+        }
+
+        const invEl = (e.target as HTMLElement).closest<HTMLElement>('[data-inventory-id]');
+        if (invEl && invEl.dataset.inventoryId) {
+          audioManager.play('selection');
+          this.selectedInventoryId = invEl.dataset.inventoryId;
+          this.render();
+          return;
+        }
+
         const target = (e.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
         if (!target) return;
 
         const action = target.getAttribute('data-action');
         if (!action) return;
 
+        if (action !== 'skip-typewriter' && action !== 'toggle-nova-panel') {
+          this.typewriter.stop();
+        }
+
         switch (action) {
+          case 'toggle-audio': {
+            audioManager.toggleMute();
+            this.render();
+            break;
+          }
+          case 'toggle-music': {
+            audioManager.toggleMusicMute();
+            this.render();
+            break;
+          }
+          case 'toggle-nova-panel':
+            audioManager.play('ui_click');
+            this.isNovaMinimized = !this.isNovaMinimized;
+            this.render();
+            break;
+          case 'skip-typewriter':
+            this.typewriter.complete();
+            break;
           case 'go-to-stage': {
             const stageNum = parseInt(target.getAttribute('data-stage') || '1', 10);
             this.setStage(stageNum);
@@ -785,6 +1067,7 @@ export class MissionWizard {
             break;
           }
           case 'focus-part': {
+            audioManager.play('ui_click');
             const id = target.getAttribute('data-part-id');
             if (id) {
               this.activeSelection = { type: 'part', id };
@@ -793,6 +1076,7 @@ export class MissionWizard {
             break;
           }
           case 'filter-category': {
+            audioManager.play('ui_click');
             const cat = target.getAttribute('data-category');
             if (cat) {
               this.activePartCategory = cat;
@@ -800,13 +1084,22 @@ export class MissionWizard {
             }
             break;
           }
+          case 'undo-design':
+            this.undoDesign();
+            break;
+          case 'reset-stage4':
+            this.resetStage4Design();
+            break;
           case 'scene-rotate-left':
+            audioManager.play('ui_click');
             this.scene.rotateBy(-0.35);
             break;
           case 'scene-rotate-right':
+            audioManager.play('ui_click');
             this.scene.rotateBy(0.35);
             break;
           case 'scene-reset-camera':
+            audioManager.play('ui_click');
             this.scene.resetCamera();
             break;
           case 'trigger-launch':
@@ -818,20 +1111,47 @@ export class MissionWizard {
             break;
           case 'restart-wizard':
           case 'restart-mission':
+            audioManager.play('ui_click');
             this.restart();
             break;
           case 'open-how-to-play':
+            audioManager.play('ui_click');
             this.isHowToPlayOpen = true;
             this.render();
             break;
           case 'close-how-to-play':
+            audioManager.play('ui_click');
             this.isHowToPlayOpen = false;
             this.render();
             break;
+          case 'open-inventory':
+            audioManager.play('selection');
+            this.isInventoryOpen = true;
+            creditsManager.unlockAchievement('science_curious');
+            this.render();
+            break;
+          case 'close-inventory':
+            audioManager.play('ui_click');
+            this.isInventoryOpen = false;
+            this.render();
+            break;
           case 'exit-wizard':
+            audioManager.play('ui_click');
             window.location.hash = '#/home';
             if (this.exitCallback) this.exitCallback();
             break;
+        }
+      },
+      { signal: this.abortController.signal }
+    );
+
+    this.container.addEventListener(
+      'keydown',
+      (e) => {
+        const target = (e.target as HTMLElement).closest('[data-action="skip-typewriter"]');
+        if (target && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          this.typewriter.complete();
         }
       },
       { signal: this.abortController.signal }

@@ -12,6 +12,26 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  font-family: var(--font-body, 'Nunito Sans', sans-serif);
+}
+
+.lobby-container h1,
+.lobby-container h2,
+.lobby-container h3,
+.lobby-container h4,
+.lobby-title,
+.entry-card-title,
+.section-title {
+  font-family: var(--font-headline, 'Fredoka', sans-serif);
+  font-weight: 700;
+}
+
+.lobby-btn,
+.role-choice-btn,
+.decision-vote-btn,
+.lobby-tab {
+  font-family: var(--font-label, 'Quicksand', sans-serif);
+  font-weight: 600;
 }
 
 /* ==========================================================================

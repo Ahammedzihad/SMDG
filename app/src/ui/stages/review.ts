@@ -87,8 +87,7 @@ export function renderReviewStage(
         <span class="stage-pill">STAGE 5 OF 7 // FLIGHT READINESS AUDIT</span>
         <h2 id="stage-heading">Pre-Launch Review Gate</h2>
         <p>
-          Before any rocket can launch, mission controllers conduct a formal Flight Readiness Review.
-          <strong>All hard checks must pass (GREEN) to proceed.</strong> Soft advisory warnings (YELLOW) are permitted with flight director sign-off.
+          Subsystem safety audit. All hard checks must pass (GREEN) for launch clearance.
         </p>
       </div>
 

@@ -178,6 +178,7 @@ export function renderObjectiveStage(
                         aria-checked="${isFracActive}"
                         data-action="select-observe-fraction"
                         data-fraction="${fraction.toFixed(2)}"
+                        style="min-height: 44px;"
                         class="py-1 px-1.5 rounded flex flex-col items-center justify-center transition-all ${
                           isFracActive
                             ? 'bg-secondary text-on-secondary font-bold shadow-[0_0_8px_rgba(123,208,255,0.4)] border border-secondary'
